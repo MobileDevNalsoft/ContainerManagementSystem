@@ -1,0 +1,59 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#threeDCanvas {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background-color: #111;
+}
+
+#threeCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+#exportButton {
+    position: absolute;
+    top: 10px;
+    /* Distance from the top */
+    right: 10px;
+    /* Distance from the right */
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+#exportButton:hover {
+    background-color: #45a049;
+}
+
+#importButton {
+    position: absolute;
+    top: 60px;
+    /* Distance from the top */
+    right: 10px;
+    /* Distance from the right */
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+#importButton:hover {
+    background-color: #45a049;
+}

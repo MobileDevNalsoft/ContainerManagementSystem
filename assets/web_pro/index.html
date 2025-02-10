@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>Warehouse Simulator</title>
+  </head>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js",
+        "orbitControls": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/controls/OrbitControls.js",
+        "bufferGeometryUtils": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/utils/BufferGeometryUtils.js",
+        "gltfLoader": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/GLTFLoader.js",
+        "textGeometry": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/geometries/TextGeometry.js",
+        "fontLoader" : "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/FontLoader.js",
+        "draco": "https://cdn.jsdelivr.net/npm/three@0.114.0/examples/jsm/loaders/DRACOLoader.js",
+        "renderer": "./utils/renderer.js",
+        "initScene": "./utils/scene_setup.js",
+        "interactions": "./utils/interactions.js",
+        "addObject": "./utils/add_object.js",
+        "camera": "./utils/camera.js",
+        "controls": "./utils/controls.js",
+        "lights": "./utils/lights.js",
+        "meshMerge": "./utils/mesh_merge.js",
+        "jsonLoader": "./utils/json_loader.js",
+        "start": "./builders/start.js",
+        "compound": "./builders/compound.js",
+        "warehouseExterior": "./builders/warehouseExterior.js",
+        "warehouseInterior": "./builders/warehouseInterior.js",
+        "plane": "./components/plane.js",
+        "box": "./components/box.js",
+        "3dText": "./components/3dText.js",
+        "storageArea":"./builders/storageArea.js",
+        "inspectionArea":"./builders/inspectionArea.js",
+        "stagingArea": "./builders/stagingArea.js",
+        "activityArea": "./builders/activityArea.js",
+        "receivingArea": "./builders/receivingArea.js",
+        "yardArea": "./builders/yardArea.js",
+        "modelLoader": "./utils/modelLoader.js"
+      }
+    }
+  </script>
+  <body>
+    <div id="threeDView">
+      <canvas id="threeCanvas"></canvas>
+    </div>
+    </script>
+    <script type="module" src="./main.js"></script>
+    <script type="module" src="./utils/global.js"></script>
+  </body>
+</html>
