@@ -21,7 +21,6 @@ export function ThreeDText(text, size, height) {
 
       const textMaterial = new THREE.MeshStandardMaterial({ color: 0x666666 }); // Red color
       const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-      textMesh.rotation.x = -Math.PI / 2;
       resolve(textMesh);
     });
   });

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:warehouse_3d/pages/three_js/three_js.dart';
+import 'package:warehouse_3d/pages/container_yard/container_yard.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case '/warehouse':
+      case '/containerManagement':
         return PageRouteBuilder(
           settings: settings,
-          pageBuilder: (context, animation, secondaryAnimation) => const ThreeJsWebView(),
+          pageBuilder: (context, animation, secondaryAnimation) => const ContainerYard3DView(),
           transitionDuration: const Duration(seconds: 1),
           reverseTransitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {

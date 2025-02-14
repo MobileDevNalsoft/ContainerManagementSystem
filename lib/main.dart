@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:warehouse_3d/bloc/container_interaction_bloc.dart';
+import 'package:warehouse_3d/inits/init.dart';
 import 'navigations/route_generator.dart';
 
-final localhostServer = InAppLocalhostServer(documentRoot: 'assets');
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MaterialApp(
-    navigatorKey: GlobalKey<NavigatorState>(),
-    theme: ThemeData(fontFamily: 'Gilroy', colorScheme: ColorScheme.fromSeed(seedColor: Colors.white, primary: Colors.black)),
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/warehouse',
-    onGenerateRoute: RouteGenerator.generateRoute,
-    navigatorObservers: [MyNavigationObserver()],
+  await init();
+
+  runApp(MultiBlocProvider(
+    providers: [
+      BlocProvider(create: (_) => ContainerInteractionBloc(networkCalls: getIt())),
+    ],
+    child: MaterialApp(
+      navigatorKey: GlobalKey<NavigatorState>(),
+      theme: ThemeData(fontFamily: 'Gilroy', colorScheme: ColorScheme.fromSeed(seedColor: Colors.white, primary: Colors.black)),
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/containerManagement',
+      onGenerateRoute: RouteGenerator.generateRoute,
+      navigatorObservers: [MyNavigationObserver()],
+    ),
   ));
 }
 

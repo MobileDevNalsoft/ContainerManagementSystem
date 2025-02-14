@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'orbitControls';
+import * as THREE from "three";
+import { OrbitControls } from "orbitControls";
 
-export function addControls(camera, renderer){
+export function addControls(){
   // Set up OrbitControls with the new camera
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; // Enable smooth movement
@@ -23,8 +23,8 @@ export function addControls(camera, renderer){
 
   controls.minDistance = 10;
   controls.maxDistance = 1000;
-  minPan = new THREE.Vector3(-150, -50, -150);
-  maxPan = new THREE.Vector3(150, 50, 150);
+  minPan = new THREE.Vector3(-300, -50, -300);
+  maxPan = new THREE.Vector3(300, 50, 300);
 
   // Function to clamp target position
   function clampTarget() {
@@ -49,11 +49,11 @@ export function addControls(camera, renderer){
   clampTarget();
 
   // Make the camera look at a specific point (optional)
-  const center = new THREE.Vector3(0, 0, 50); // Adjust this based on your scene
+  const center = new THREE.Vector3(0, 0, 100); // Adjust this based on your scene
   controls.target.copy(center);
 
   // Update controls to reflect the target position
   controls.update();
 
-  return controls;
+  globalThis.controls = controls;
 }

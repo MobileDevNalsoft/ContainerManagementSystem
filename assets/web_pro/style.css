@@ -8,52 +8,30 @@ html {
     font-family: Arial, sans-serif;
 }
 
-#threeDCanvas {
-    height: 100%;
-    width: 100%;
-    position: relative;
-    background-color: #111;
-}
-
 #threeCanvas {
     width: 100%;
     height: 100%;
 }
 
-#exportButton {
-    position: absolute;
-    top: 10px;
-    /* Distance from the top */
-    right: 10px;
-    /* Distance from the right */
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    z-index: 10;
-}
+#tooltip {
+  position: absolute;
+  display: none;
+  /* Initially hidden */
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #fff;
+  opacity: 0.9;
+  font-size: 12px;
+    z-index: 1000;
+  width: auto;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.2);
+  /* High enough to appear above other elements */
 
-#exportButton:hover {
-    background-color: #45a049;
-}
-
-#importButton {
-    position: absolute;
-    top: 60px;
-    /* Distance from the top */
-    right: 10px;
-    /* Distance from the right */
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    z-index: 10;
-}
-
-#importButton:hover {
-    background-color: #45a049;
+  animation: bounceIn 0.5s ease forwards; /* Apply animation when visible */
+  transform-origin: center bottom; /* Anchor point for bounce */
+  z-index: 2;
 }

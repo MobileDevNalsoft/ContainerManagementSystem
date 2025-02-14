@@ -1,42 +1,105 @@
 import * as THREE from "three";
-import { addObjectToScene } from "addObject";
 
-export function addInteractions(scene, camera, renderer, gridHelper) {
+export function addInteractions() {
+  const container = document.getElementById("container-yard-3dview");
+
   const raycaster = new THREE.Raycaster();
 
-  // need mouse coordinates for raycasting.
   const mouse = new THREE.Vector2();
   const lastPos = new THREE.Vector2();
-
-  const draggableElements = document.querySelectorAll(".draggable");
-  let draggedObjectType = null;
-
-  draggableElements.forEach((item) => {
-    item.addEventListener("dragstart", (event) => {
-      draggedObjectType = event.target.id; // Get the type of object (cube, sphere, cylinder)
-    });
-  });
-
-  const threeCanvas = document.getElementById("threeCanvas");
-
-  threeCanvas.addEventListener("dragover", (event) => {
-    event.preventDefault(); // Allow dropping
-  });
-
-  threeCanvas.addEventListener("drop", (e) => {
-    e.preventDefault();
-
-    // Find the drop position in 3D space using raycasting
-    const mouse = new THREE.Vector2();
-    const rect = document.getElementById("threeDView").getBoundingClientRect();
+  function onMouseMove(e) {
+    if (e.target.classList.contains("ignoreRaycast")) {
+      return;
+    }
+    const rect = container.getBoundingClientRect();
     mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(gridHelper);
-
+    // This method sets up the raycaster to cast a ray from the camera into the 3D scene based on the current mouse position. It allows you to determine which objects in the scene are intersected by that ray.
+    const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
-      addObjectToScene(scene, draggedObjectType);
+      const targetObject = intersects[0].object;
     }
-  });
+  }
+
+  function onMouseDown(e) {
+    lastPos.x = (e.clientX / container.clientWidth) * 2 - 1;
+    lastPos.y = -(e.clientY / container.clientHeight) * 2 + 1;
+  }
+
+  function onMouseUp(e) {
+    if (e.target.classList.contains("ignoreRaycast")) return;
+
+    const tooltip = document.getElementById("tooltip");
+    raycaster.setFromCamera(mouse, camera);
+    // This method sets up the raycaster to cast a ray from the camera into the 3D scene based on the current mouse position. It allows you to determine which objects in the scene are intersected by that ray.
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length === 0) return;
+    const targetObject = intersects[0].object;
+    globalThis.targetObject = targetObject;
+
+    console.log("name:", targetObject.name);
+    if ((lastPos.distanceTo(mouse) <= 0.05) & (e.button === 0)) {
+      if (targetObject.name.includes("lot")) {
+        globalThis.lot = targetObject.name;
+        const areaName = targetObject.userData?.area;
+
+        if (!areaName) return; // Prevent errors if `area` is undefined
+
+        const areaData = lotsData[`${areaName.toLowerCase()}_area`];
+        const lotNo = targetObject.name.split("_")[1];
+
+        if (areaData && areaData[lotNo]?.length <= 1) {
+          console.log(JSON.stringify({ lotNo: lotNo, area: areaName }));
+        }
+      } else if (targetObject.name.includes("Container")) {
+        const uuid = targetObject.parent?.uuid;
+        if (uuid && globalThis.objData.has(uuid)) {
+          globalThis.currentContainerUUID = uuid;
+          console.log(
+            JSON.stringify({
+              containerNbr: globalThis.objData.get(uuid).containerNbr,
+              area: globalThis.objData.get(uuid).area,
+            })
+          );
+        }
+      }
+    } else if ((lastPos.distanceTo(mouse) <= 0.05) & (e.button === 2)) {
+      if (targetObject.name.includes("Container")) {
+        const uuid = targetObject.parent?.uuid;
+        if (uuid && globalThis.objData.has(uuid)) {
+          console.log(
+            JSON.stringify({
+              deleteContainer: globalThis.objData.get(uuid).containerNbr,
+              area: globalThis.objData.get(uuid).area,
+            })
+          );
+        }
+      }
+    }
+  }
+
+  window.addEventListener("mousemove", onMouseMove); // triggered when mouse pointer is moved.
+  window.addEventListener("mousedown", onMouseDown);
+  window.addEventListener("mouseup", onMouseUp); // triggered when mouse pointer is clicked.
+
+  document.addEventListener("wheel", (event) => {});
+}
+
+export function updateTooltipPosition(targetObject, tooltip, camera) {
+  if (!targetObject || !tooltip) return;
+
+  // Get the object's world position
+  const objectPosition = new THREE.Vector3();
+  targetObject.getWorldPosition(objectPosition);
+
+  // Convert world position to screen coordinates
+  const vector = objectPosition.project(camera);
+  const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+
+  // Position tooltip at the object's screen position
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top = `${y - 60}px`; // Adjust to avoid overlapping
 }

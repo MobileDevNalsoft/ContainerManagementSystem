@@ -1,33 +1,33 @@
 // Import Three.js core from the import map
-
 import { createRenderer } from "renderer";
 import { createCamera } from "camera";
 import { initScene } from "initScene";
 import { addControls } from "controls";
 import { loadJSON } from "jsonLoader";
-import { startBuildingWarehouse } from "start";
-
-let undoStack = [];
-let redoStack = [];
-// Store the currently selected object
-let selectedObject = null;
-let selectedObjectOutline = null;
-let localOriginMarker = null;
+import { buildAreas } from "areas";
+import { addInteractions } from "interactions";
+import { getBoxGeometry } from "box";
 
 document.addEventListener("DOMContentLoaded", async function () {
-  const renderer = createRenderer();
 
-  const camera = createCamera();
+  createRenderer();
 
-  const { scene } = initScene(renderer, camera);
+  createCamera();
 
-  const controls = addControls(camera, renderer);
+  addControls();
 
-  const json = await loadJSON('./warehouse.json');
+  addInteractions();
 
-  startBuildingWarehouse(json, scene);
+  initScene();
 
-  // Step 4: Render loop
+  await loadJSON('./container_yard.json');
+
+  const base = getBoxGeometry(700, 0.03, 700, 0x999999);
+
+  scene.add(base);
+
+  buildAreas();
+
   function animate() {
     requestAnimationFrame(animate);
     controls.update();

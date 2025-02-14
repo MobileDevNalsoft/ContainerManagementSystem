@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export function createCamera() {
   const camera = new THREE.PerspectiveCamera(
@@ -9,7 +9,7 @@ export function createCamera() {
   );
 
   // Adjusted camera position
-  camera.position.set(0, 50, 150); // Set to view the scene correctly
+  camera.position.set(0,650,200); // Set to view the scene correctly
 
-  return camera;
+  globalThis.camera = camera;
 }

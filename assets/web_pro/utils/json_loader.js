@@ -11,5 +11,5 @@ export async function loadJSON(path) {
         .catch(error => {
             console.error('Error fetching data:', error);
         });
-    return data;
+    globalThis.json = data;
 }

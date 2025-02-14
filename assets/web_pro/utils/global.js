@@ -10,3 +10,5 @@ function toCamelCase(str) {
 
 // Make the function globally accessible
 globalThis.toCamelCase = toCamelCase;
+
+globalThis.objData = new Map();

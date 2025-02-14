@@ -1,0 +1,28 @@
+{
+  "lotSize":{
+    "width": 10,
+    "depth": 30
+  },
+  "areas":{
+    "dryArea": {
+      "name": "DRY",
+      "totalLots": 50,
+      "lotsPerRow": 10
+    },
+    "frozenArea": {
+      "name": "FROZEN",
+      "totalLots": 50,
+      "lotsPerRow": 10
+    },
+    "damagedArea": {
+      "name": "DAMAGED",
+      "totalLots": 50,
+      "lotsPerRow": 10
+    },
+    "emptyArea": {
+      "name": "EMPTY",
+      "totalLots": 50,
+      "lotsPerRow": 10
+    }
+  }
+}
