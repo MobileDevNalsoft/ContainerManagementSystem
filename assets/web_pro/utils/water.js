@@ -354,7 +354,7 @@ export function createWaterEffect(){
   });
 
   water.rotation.x = -Math.PI / 2;
-  water.position.y = -1; // Place below container yard
+  water.position.y = -50; // Place below container yard
   globalThis.water = water;
   scene.add(water);
 }

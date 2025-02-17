@@ -6,6 +6,7 @@ import { addControls } from "controls";
 import { loadJSON } from "jsonLoader";
 import { addInteractions } from "interactions";
 import { getBoxGeometry } from "box";
+import { loadEnvironment } from "environment";
 import * as THREE from "three";
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -21,7 +22,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   
   await loadJSON("./container_yard.json");
-  
+
+  await loadEnvironment();
+
   const base = getBoxGeometry(700, 0.03, 700, 0x999999);
 
   base.name = 'YARD_AREA';
