@@ -36,7 +36,7 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
         Align(
           alignment: Alignment.centerLeft,
           child: BlocConsumer<ContainerInteractionBloc, ContainerInteractionState>(
-            listenWhen: (previous, current) => previous.getLotsDataStatus != current.getLotsDataStatus || previous.webLoaded != current.webLoaded,
+            listenWhen: (previous, current) => previous.getLotsDataStatus != current.getLotsDataStatus,
             listener: (context, state) {
               if (state.getLotsDataStatus == LotsDataStatus.success) {
                 state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
@@ -79,6 +79,8 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
       Customs.RelocateContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
     } else if (data.keys.first == 'deleteContainer') {
       Customs.DeleteContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
+    } else if (data.keys.first == 'start') {
+      _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: "buildAreas();");
     }
   }
 }
