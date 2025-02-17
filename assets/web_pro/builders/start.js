@@ -134,39 +134,5 @@ export async function startBuildingContainerYard() {
     }
   }
 
-  // Create a GSAP timeline for smoother transitions
-  const timeline = gsap.timeline();
-
-  controls.enabled = false;
-  controls.enableDamping = false;
-
-  // Animate position and rotation simultaneously
-  timeline
-    .to(camera.position, {
-      duration: 3,
-      x: 0,
-      y: 80,
-      z: 110,
-      ease: "power3.inOut",
-    })
-    .to(
-      controls.target,
-      {
-        duration: 3,
-        x: 0,
-        y: 0,
-        z: 0,
-        ease: "power3.inOut",
-        onUpdate: function () {
-          camera.lookAt(controls.target); // Smoothly look at the target
-        },
-      },
-      "<"
-    );
-
-  // Callbacks after animation completes
-  timeline.call(() => {
-    controls.enabled = true; // Re-enable controls after animation
-    controls.enableDamping = true; // Re-enable damping after animation
-  });
+  
 }

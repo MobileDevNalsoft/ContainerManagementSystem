@@ -9,8 +9,8 @@
       "totalLots": 50,
       "lotsPerRow": 10
     },
-    "frozenArea": {
-      "name": "FROZEN",
+    "refrigeratedArea": {
+      "name": "REFRIGERATED",
       "totalLots": 50,
       "lotsPerRow": 10
     },

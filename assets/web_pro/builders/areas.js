@@ -4,10 +4,10 @@ import { ThreeDText } from "3dText";
 import { loadModel } from "modelLoader";
 import { DragControls } from "dragControls";
 
-export function buildAreas() {
+window.buildAreas = function () {
   buildArea(json.areas.dryArea, lotsData.dry_area, new THREE.Vector3(-130,0,-150), 0xd2b48c);
   buildArea(json.areas.damagedArea, lotsData.damaged_area, new THREE.Vector3(130,0,-150), 0xe07d77);
-  buildArea(json.areas.frozenArea, lotsData.frozen_area, new THREE.Vector3(130,0,150), 0xadd8e6);
+  buildArea(json.areas.refrigeratedArea, lotsData.refrigerated_area, new THREE.Vector3(130,0,150), 0xadd8e6);
   buildArea(json.areas.emptyArea, lotsData.empty_area, new THREE.Vector3(-130,0,150), 0xf5f5f5);
 }
 

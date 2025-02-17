@@ -3,6 +3,7 @@ import { ThreeDText } from "3dText";
 
 window.storeLotsData = function (data) {
   globalThis.lotsData = JSON.parse(data);
+  console.log('{"start":"building"}')
 };
 
 // add container
@@ -55,6 +56,9 @@ window.deleteContainer = function () {
   }
 
   if (targetObject.parent) {
+    console.log("Target Object:", targetObject);
+    console.log("Target Object Parent:", targetObject.parent);
+
     // Dispose of target object
     if (targetObject.geometry) {
       targetObject.geometry.dispose();
@@ -84,17 +88,22 @@ window.deleteContainer = function () {
       console.warn("Title object not found.");
     }
 
-    // Remove container object
-    targetObject.parent.traverse((child) => {
+    // Remove all children from parent (including the container)
+    targetObject.parent.children.slice().forEach((child) => {
       if (child.geometry) {
         child.geometry.dispose();
       }
       if (child.material) {
         child.material.dispose();
       }
+      targetObject.parent.remove(child);
+      scene.remove(child);
     });
 
+    // Remove the container's parent from scene
+    targetObject.parent.parent?.remove(targetObject.parent);
     scene.remove(targetObject.parent);
+
     console.log("Removed:", targetObject.parent);
 
     // Remove from objData
@@ -105,6 +114,14 @@ window.deleteContainer = function () {
 
   // Force scene update
   scene.updateMatrixWorld(true);
+
+  // Debug: Print all objects remaining in the scene
+  scene.traverse((obj) => {
+    console.log(
+      `Remaining Object: ${obj.name || obj.uuid}, Position:`,
+      obj.position
+    );
+  });
 };
 
 window.relocateContainer = function (targetLot, targetContainer, areaName) {

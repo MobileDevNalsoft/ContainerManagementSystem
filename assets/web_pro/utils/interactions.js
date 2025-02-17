@@ -42,13 +42,13 @@ export function addInteractions() {
     console.log("name:", targetObject.name);
     if ((lastPos.distanceTo(mouse) <= 0.05) & (e.button === 0)) {
       if (targetObject.name.includes("lot")) {
-        globalThis.lot = targetObject.name;
         const areaName = targetObject.userData?.area;
-
+        
         if (!areaName) return; // Prevent errors if `area` is undefined
-
+        
         const areaData = lotsData[`${areaName.toLowerCase()}_area`];
         const lotNo = targetObject.name.split("_")[1];
+        globalThis.lot = lotNo;
 
         if (areaData && areaData[lotNo]?.length <= 1) {
           console.log(JSON.stringify({ lotNo: lotNo, area: areaName }));

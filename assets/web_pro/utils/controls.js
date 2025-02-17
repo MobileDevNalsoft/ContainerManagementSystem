@@ -48,10 +48,6 @@ export function addControls(){
   // Initial call to set target within bounds if necessary
   clampTarget();
 
-  // Make the camera look at a specific point (optional)
-  const center = new THREE.Vector3(0, 0, 100); // Adjust this based on your scene
-  controls.target.copy(center);
-
   // Update controls to reflect the target position
   controls.update();
 
