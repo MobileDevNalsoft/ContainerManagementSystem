@@ -35,6 +35,8 @@ async function buildArea(areaJson, areaLotsData, position, color) {
 
   area.position.set(position.x, position.y, position.z);
 
+  area.name = areaJson.name+'_AREA';
+
   const areaCenter = new THREE.Vector3();
   area.updateMatrixWorld();
   area.getWorldPosition(areaCenter);

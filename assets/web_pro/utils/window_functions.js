@@ -3,7 +3,6 @@ import { ThreeDText } from "3dText";
 
 window.storeLotsData = function (data) {
   globalThis.lotsData = JSON.parse(data);
-  console.log('{"start":"building"}')
 };
 
 // add container

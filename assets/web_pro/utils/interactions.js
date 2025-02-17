@@ -39,7 +39,7 @@ export function addInteractions() {
     const targetObject = intersects[0].object;
     globalThis.targetObject = targetObject;
 
-    console.log("name:", targetObject.name);
+    console.warn("name:", targetObject.name);
     if ((lastPos.distanceTo(mouse) <= 0.05) & (e.button === 0)) {
       if (targetObject.name.includes("lot")) {
         const areaName = targetObject.userData?.area;
@@ -64,6 +64,8 @@ export function addInteractions() {
             })
           );
         }
+      } else if (targetObject.name.includes('AREA')){
+        switchCamera();
       }
     } else if ((lastPos.distanceTo(mouse) <= 0.05) & (e.button === 2)) {
       if (targetObject.name.includes("Container")) {

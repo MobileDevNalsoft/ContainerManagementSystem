@@ -17,7 +17,7 @@ export function initScene() {
 
   addLights(scene);
 
-  createWaterEffect();
+  // createWaterEffect();
 
   // Create a GSAP timeline for smoother transitions
   const timeline = gsap.timeline();

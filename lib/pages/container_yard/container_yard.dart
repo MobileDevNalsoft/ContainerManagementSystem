@@ -24,6 +24,7 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
     // TODO: implement initState
     super.initState();
     _containerInteractionBloc = context.read<ContainerInteractionBloc>();
+    _containerInteractionBloc.add(GetLotsData());
   }
 
   @override
@@ -38,27 +39,34 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
           child: BlocConsumer<ContainerInteractionBloc, ContainerInteractionState>(
             listenWhen: (previous, current) => previous.getLotsDataStatus != current.getLotsDataStatus,
             listener: (context, state) {
-              if (state.getLotsDataStatus == LotsDataStatus.success) {
+              if (state.getLotsDataStatus == LotsDataStatus.success && state.webLoaded!) {
                 state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
               }
             },
+            buildWhen: (previous, current) => previous.sentDataToJS != current.sentDataToJS,
             builder: (context, state) {
-              return InAppWebView(
-                initialFile: 'assets/web_pro/index.html',
-                onWebViewCreated: (controller) async {
-                  _containerInteractionBloc.state.webViewController = controller;
-                  _containerInteractionBloc.add(GetLotsData());
-                },
-                onConsoleMessage: (controller, consoleMessage) {
-                  if (consoleMessage.messageLevel.toNativeValue() == 1 && consoleMessage.message.contains('{"')) {
-                    Map<String, dynamic> message = jsonDecode(consoleMessage.message);
-                    jsToFlutter(message);
-                  }
-                },
-                onLoadStart: (controller, url) {
-                  state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
-                },
-              );
+              return state.sentDataToJS!
+                  ? InAppWebView(
+                      initialFile: 'assets/web_pro/index.html',
+                      onWebViewCreated: (controller) async {
+                        _containerInteractionBloc.state.webViewController = controller;
+                      },
+                      onConsoleMessage: (controller, consoleMessage) {
+                        if (consoleMessage.messageLevel.toNativeValue() == 1 && consoleMessage.message.contains('{"')) {
+                          Map<String, dynamic> message = jsonDecode(consoleMessage.message);
+                          jsToFlutter(message);
+                        }
+                      },
+                      onLoadStart: (controller, url) {
+                        state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
+                      },
+                      onLoadStop: (controller, url) {
+                        _containerInteractionBloc.add(WebLoaded(loaded: true));
+                      },
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(),
+                    );
             },
           ),
         ),
@@ -79,8 +87,6 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
       Customs.RelocateContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
     } else if (data.keys.first == 'deleteContainer') {
       Customs.DeleteContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
-    } else if (data.keys.first == 'start') {
-      _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: "buildAreas();");
     }
   }
 }

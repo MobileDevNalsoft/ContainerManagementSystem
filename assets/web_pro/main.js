@@ -19,18 +19,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   initScene();
 
+  
   await loadJSON("./container_yard.json");
-
+  
   const base = getBoxGeometry(700, 0.03, 700, 0x999999);
 
+  base.name = 'YARD_AREA';
+  
   scene.add(base);
-
+  
+  buildAreas();
+  
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
 
 
-    water.material.uniforms['time'].value += clock.getDelta()*0.6; 
+    // water.material.uniforms['time'].value += clock.getDelta()*0.6; 
     controls.update();
     renderer.render(scene, camera);
   }

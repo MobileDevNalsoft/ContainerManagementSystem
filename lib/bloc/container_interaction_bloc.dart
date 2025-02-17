@@ -30,7 +30,7 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
       await _networkCalls.get(AppConstants.GET_AREA_LOTS).then(
         (apiResponse) {
           Log.d(jsonDecode(apiResponse.response!.data)['data']);
-          emit(state.copyWith(lotsData: jsonDecode(apiResponse.response!.data)['data'], getLotsDataStatus: LotsDataStatus.success));
+          emit(state.copyWith(lotsData: jsonDecode(apiResponse.response!.data)['data'], getLotsDataStatus: LotsDataStatus.success, sentDataToJS: true));
         },
       );
     } catch (e) {
