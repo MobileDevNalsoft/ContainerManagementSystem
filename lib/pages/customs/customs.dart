@@ -9,8 +9,8 @@ import 'package:gap/gap.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:warehouse_3d/bloc/container_interaction_bloc.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 
 class Customs {
   static Widget DataSheet({required Size size, required String title, required List<Widget> children, controller, required BuildContext context}) {
@@ -55,6 +55,87 @@ class Customs {
           }),
         ),
       ],
+    );
+  }
+
+  static void AnimatedDialog({required BuildContext context, required Widget header, required List<Widget> content, Function? onClose}) {
+    Size size = MediaQuery.of(context).size;
+
+    showGeneralDialog(
+      context: context,
+      barrierColor: Colors.black45,
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedValue = Curves.bounceInOut.transform(animation.value);
+        return Transform.scale(
+          scale: curvedValue,
+          child: Opacity(
+            opacity: animation.value,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+      barrierDismissible: true,
+      barrierLabel: '',
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return StatefulBuilder(builder: (context, state) {
+          return PointerInterceptor(
+            child: Container(
+              margin: EdgeInsets.only(top: size.height * 0.4),
+              alignment: Alignment.topCenter,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      margin: EdgeInsets.only(top: size.height * 0.035),
+                      width: size.width * 0.16,
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: EdgeInsets.only(top: size.height * 0.005, right: size.width * 0.002),
+                              child: PointerInterceptor(
+                                child: InkWell(
+                                  onTap: () {
+                                    if (onClose != null) {
+                                      onClose();
+                                    }
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 20,
+                                    weight: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          ...content,
+                          Gap(size.height * 0.01),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ClipPath(
+                    clipper: DialogTopClipper(),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      radius: 35,
+                      child: Transform.translate(offset: Offset(0, -size.height * 0.01), child: header),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+      },
     );
   }
 
@@ -309,7 +390,7 @@ class Customs {
     );
   }
 
-  static void RelocateContainerDialog({required BuildContext context, required String containerNbr, required String area}) {
+  static void RelocateContainerDialog({required BuildContext context, required String containerNbr, required String area, required String lotNo}) {
     Size size = MediaQuery.of(context).size;
     final ContainerInteractionBloc containerInteractionBloc = context.read<ContainerInteractionBloc>();
     showGeneralDialog(
@@ -417,9 +498,9 @@ class Customs {
                                               );
                                             },
                                             suggestionsCallback: (pattern) {
-                                              print(area);
                                               return state.lotsData!['${area.toLowerCase()}_area'].keys
-                                                  .where((e) => e.contains(pattern) && state.lotsData!['${area.toLowerCase()}_area'][e].length < 2)
+                                                  .where(
+                                                      (e) => e.contains(pattern) && state.lotsData!['${area.toLowerCase()}_area'][e].length < 5 && e != lotNo)
                                                   .toList()
                                                 ..sort((a, b) {
                                                   // Extract numbers from lot names
@@ -490,18 +571,17 @@ class Customs {
   static Future CMSFlushbar(Size size, BuildContext context, {String message = 'message', Widget? icon}) async {
     // Show the flushbar using Flushbar package
     await Flushbar(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       blockBackgroundInteraction: true,
-      messageColor: Colors.black,
+      messageColor: Colors.white,
       message: message,
       padding: EdgeInsets.symmetric(vertical: size.height * 0.015, horizontal: size.width * 0.005),
       messageSize: 16,
-      flushbarPosition: FlushbarPosition.TOP,
+      flushbarPosition: FlushbarPosition.BOTTOM,
       duration: const Duration(seconds: 2),
       borderRadius: BorderRadius.circular(8),
       icon: icon,
       boxShadows: [BoxShadow(blurRadius: 12, blurStyle: BlurStyle.outer, spreadRadius: 0, color: Colors.blue.shade900, offset: const Offset(0, 0))],
-      margin: EdgeInsets.only(top: size.height * 0.016, left: size.width * 0.8, right: size.width * 0.02),
     ).show(context);
   }
 }
@@ -509,7 +589,7 @@ class Customs {
 String? containerNbrValidator(String value) {
   RegExp regex = RegExp(r'^[A-Za-z]{4}\d{7}$');
   if (!regex.hasMatch(value)) {
-    return "container number should contains first four alphabets and seven digits";
+    return "container number should contain first four alphabets followed by seven digits";
   }
   return null;
 }
@@ -522,5 +602,29 @@ class UpperCaseTextFormatter extends TextInputFormatter {
       text: newValue.text.toUpperCase(),
       selection: newValue.selection,
     );
+  }
+}
+
+class DialogTopClipper extends CustomClipper<Path> {
+  @override
+  getClip(Size size) {
+    double x1 = 0;
+    double y1 = 0;
+    double x = size.width;
+    double y = size.height;
+
+    Path path = Path();
+    path.moveTo(x1, y1);
+    path.lineTo(x1, y / 1.4);
+    path.lineTo(x, y / 1.4);
+    path.lineTo(x, y1);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper oldClipper) {
+    // TODO: implement shouldReclip
+    return true;
   }
 }

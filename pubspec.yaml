@@ -51,7 +51,6 @@ dependencies:
   lottie: ^3.1.2
   flutter_staggered_grid_view: ^0.7.0
   file_picker: ^8.1.2
-  three_js: ^0.0.6
   flutter_inappwebview: ^6.1.5
   skeletonizer: ^1.4.2
   equatable: ^2.0.5
@@ -59,6 +58,7 @@ dependencies:
   another_flushbar: ^1.12.30
   dropdown_button2: ^2.3.9
   flutter_typeahead: ^5.2.0
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +87,7 @@ flutter:
     - assets/images/
     - assets/glbs/
     - assets/web_pro/
+    - assets/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

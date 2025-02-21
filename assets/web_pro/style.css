@@ -1,16 +1,16 @@
 body,
 html {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
 #threeCanvas {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 #tooltip {
@@ -25,13 +25,34 @@ html {
   border: 1px solid #fff;
   opacity: 0.9;
   font-size: 12px;
-    z-index: 1000;
+  z-index: 1000;
   width: auto;
   letter-spacing: 1px;
   box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.2);
   /* High enough to appear above other elements */
-
+  line-height: 1.5;
   animation: bounceIn 0.5s ease forwards; /* Apply animation when visible */
   transform-origin: center bottom; /* Anchor point for bounce */
   z-index: 2;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.8) translateY(-30px); /* Start small and above */
+    opacity: 0; /* Fully transparent */
+  }
+  50% {
+    transform: scale(1.1) translateY(10px); /* Bounce slightly above final position */
+    opacity: 1; /* Fully opaque */
+  }
+  100% {
+    transform: scale(1) translateY(0); /* Final position */
+    opacity: 1; /* Fully opaque */
+  }
+}
+
+#tooltip strong {
+  display: block; /* Make the name a block element to center it */
+  text-align: center;
+  margin: 5px;
 }

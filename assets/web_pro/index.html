@@ -14,37 +14,35 @@
           "gltfLoader": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/GLTFLoader.js",
           "textGeometry": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/geometries/TextGeometry.js",
           "fontLoader" : "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/FontLoader.js",
-          "draco": "https://cdn.jsdelivr.net/npm/three@0.114.0/examples/jsm/loaders/DRACOLoader.js",
-          "dragControls": "./node_modules/three/examples/jsm/controls/DragControls.js",
-          "renderer": "./utils/renderer.js",
-          "initScene": "./utils/scene_setup.js",
-          "interactions": "./utils/interactions.js",
-          "addObject": "./utils/add_object.js",
-          "camera": "./utils/camera.js",
-          "controls": "./utils/controls.js",
-          "lights": "./utils/lights.js",
-          "meshMerge": "./utils/mesh_merge.js",
-          "jsonLoader": "./utils/json_loader.js",
-          "water": "./utils/water.js",
-          "plane": "./components/plane.js",
-          "box": "./components/box.js",
-          "3dText": "./components/3dText.js",
-          "modelLoader": "./utils/modelLoader.js",
-          "start": "./builders/start.js",
-          "yard": "./builders/yard.js",
-          "containers": "./builders/containers.js",
-          "areas": "./builders/areas.js",
-          "environment": "./utils/environment.js"
+          "draco": "https://cdn.jsdelivr.net/npm/three@0.114.0/examples/jsm/loaders/DRACOLoader.js"
         }
       }
     </script>
-    <script type="module" src="./utils/global.js"></script>
-    <script type="module" src="./utils/window_functions.js"></script>
-    <script type="module" src="./builders/areas.js"></script>
+    <script type="module" src="./util_global.js"></script>
+    <script type="module" src="./util_window_functions.js"></script>
+    <script type="module" src="./util_renderer.js"></script>
+    <script type="module" src="./util_camera.js"></script>
+    <script type="module" src="./util_controls.js"></script>
+    <script type="module" src="./util_scene_setup.js"></script>
+    <script type="module" src="./util_camera.js"></script>
+    <script type="module" src="./util_json_loader.js"></script>
+    <script type="module" src="./util_lights.js"></script>
+    <script type="module" src="./util_mesh_merge.js"></script>
+    <script type="module" src="./util_modelLoader.js"></script>
+    <script type="module" src="./util_textureLoader.js"></script>
+    <script type="module" src="./util_interactions.js"></script>
+    <script type="module" src="./util_date.js"></script>
+    <script type="module" src="./util_animations.js"></script>
+    <script type="module" src="./component_environment.js"></script>
+    <script type="module" src="./component_water.js"></script>
+    <script type="module" src="./component_sky_dome.js"></script>
+    <script type="module" src="./component_3dText.js"></script>
+    <script type="module" src="./component_box.js"></script>
+    <script type="module" src="./builder_areas.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   </head>
   <body>
-    <div id="tooltip" class="ignoreRaycast">Tooltip Data</div>
+    <div id="tooltip">Tooltip Data</div>
     <div id="container-yard-3dview">
       <canvas id="threeCanvas"></canvas>
     </div>

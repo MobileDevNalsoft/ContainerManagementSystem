@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warehouse_3d/pages/authentication/login.dart';
 import 'package:warehouse_3d/pages/container_yard/container_yard.dart';
 
 class RouteGenerator {
@@ -8,6 +9,21 @@ class RouteGenerator {
         return PageRouteBuilder(
           settings: settings,
           pageBuilder: (context, animation, secondaryAnimation) => const ContainerYard3DView(),
+          transitionDuration: const Duration(seconds: 1),
+          reverseTransitionDuration: const Duration(milliseconds: 500),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final tween = Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeInOut));
+            final fadeAnimation = animation.drive(tween);
+            return FadeTransition(
+              opacity: fadeAnimation,
+              child: child,
+            );
+          },
+        );
+      case '/login':
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
           transitionDuration: const Duration(seconds: 1),
           reverseTransitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {

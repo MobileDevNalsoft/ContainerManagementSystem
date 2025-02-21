@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:three_js/three_js.dart';
-import 'package:warehouse_3d/bloc/container_interaction_bloc.dart';
+import 'package:lottie/lottie.dart';
+import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 import 'package:warehouse_3d/pages/customs/customs.dart';
 
 class ContainerYard3DView extends StatefulWidget {
@@ -35,12 +33,13 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
       alignment: Alignment.center,
       children: [
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.bottomLeft,
           child: BlocConsumer<ContainerInteractionBloc, ContainerInteractionState>(
-            listenWhen: (previous, current) => previous.getLotsDataStatus != current.getLotsDataStatus,
+            listenWhen: (previous, current) => previous.getLotsDataStatus != current.getLotsDataStatus || previous.webLoaded != current.webLoaded,
             listener: (context, state) {
               if (state.getLotsDataStatus == LotsDataStatus.success && state.webLoaded!) {
                 state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
+                state.webViewController!.evaluateJavascript(source: "setCustomer('Sravan');");
               }
             },
             buildWhen: (previous, current) => previous.sentDataToJS != current.sentDataToJS,
@@ -57,24 +56,27 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                           jsToFlutter(message);
                         }
                       },
-                      onLoadStart: (controller, url) {
-                        state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
-                      },
                       onLoadStop: (controller, url) {
                         _containerInteractionBloc.add(WebLoaded(loaded: true));
                       },
                     )
-                  : Center(
+                  : const Center(
                       child: CircularProgressIndicator(),
                     );
             },
           ),
         ),
-        if (context.watch<ContainerInteractionBloc>().state.getAddContainerStatus == AddContainerStatus.loading ||
-            context.watch<ContainerInteractionBloc>().state.getLotsDataStatus == LotsDataStatus.loading)
-          Center(
-            child: CircularProgressIndicator(),
-          )
+        if (context.watch<ContainerInteractionBloc>().state.modelLoaded! == false)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: size.height,
+              width: size.width,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(color: Color.fromRGBO(192, 208, 230, 1)),
+              child: Lottie.asset('assets/lottie/rendering.json'),
+            ),
+          ),
       ],
     ));
   }
@@ -84,9 +86,11 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
     if (data.keys.first == 'lotNo') {
       Customs.AddContainerDialog(context: context, lotNo: data.values.first, area: data.values.last);
     } else if (data.keys.first == 'containerNbr') {
-      Customs.RelocateContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
+      Customs.RelocateContainerDialog(context: context, containerNbr: data.values.first, area: data['area'], lotNo: data.values.last);
     } else if (data.keys.first == 'deleteContainer') {
       Customs.DeleteContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
+    } else if (data.keys.first == 'loaded') {
+      _containerInteractionBloc.add(ModelLoaded(loaded: true));
     }
   }
 }
