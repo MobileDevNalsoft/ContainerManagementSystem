@@ -1,127 +1,240 @@
 import * as THREE from "three";
 
 window.loadEnvironment = async function (topLeftCorner) {
-  const gltf = await loadModel("../glbs/industry.glb");
+
+  const gltf = await loadModel("../glbs/office1.glb");
   const model = gltf.scene;
-  const modelBoundingBox = new THREE.Box3().setFromObject(model);
-  const modelSize = new THREE.Vector3();
-  modelBoundingBox.getSize(modelSize);
-  model.position.set(
-    topLeftCorner.x + modelSize.z / 2 - 25,
-    0,
-    topLeftCorner.z + modelSize.x / 2 - 20
-  );
   scene.add(model);
-  addSkyDome();
-  createWaterEffect();
+  await addSkyDome();
   createLand();
-  await createCustomRoad();
+  // await loadSurroundings();
+  // await loadHysterStacker();
+  // await loadTruck();
+  // await addParkingArea();
+  // addClouds();
+  // addFencing();
+  // await createCustomRoad();
 };
 
 function createLand() {
-  // Create land geometry
-  const landGeometry = new THREE.BoxGeometry(1200, 1800, 50, 100, 100); // Adjust size & resolution
-
-  // Load textures
+  // 🌱 Load Ground Textures
   const textureLoader = new THREE.TextureLoader();
-  const landTexture = textureLoader.load("./land.jpg");
+  const groundTexture = textureLoader.load("ground.jpg"); // Replace with your texture path
+  groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+  groundTexture.repeat.set(10, 10);
 
-  // Configure texture properties
-  landTexture.wrapS = landTexture.wrapT = THREE.RepeatWrapping;
-  landTexture.repeat.set(10, 10); // Adjust for tiling effect
+  const displacementTexture = textureLoader.load("ground_disp.jpg");
+  displacementTexture.wrapS = displacementTexture.wrapT = THREE.RepeatWrapping;
+  displacementTexture.repeat.set(10, 10);
 
-  // Create material with displacement for a natural terrain look
-  const landMaterial = new THREE.MeshStandardMaterial({
-    map: landTexture, // Color texture
-    displacementScale: 20, // Adjust elevation strength
-    roughness: 0.8, // Make it less reflective
-    metalness: 0.1, // Slight metallic feel
+  const groundAoMap = textureLoader.load("ground_ao.jpg");
+  groundAoMap.wrapS = groundAoMap.wrapT = THREE.RepeatWrapping;
+  groundAoMap.repeat.set(10, 10);
+
+  // 🌾 Create Realistic Ground
+  const groundGeometry = new THREE.PlaneGeometry(1800, 1800, 100, 100);
+  const groundMaterial = new THREE.MeshStandardMaterial({
+    map: groundTexture,
+    displacementMap: displacementTexture,
+    displacementScale: 20, // Adjust terrain bumpiness
+    aoMap: groundAoMap,
+    aoMapIntensity: 1,
+    roughness: 0.8,
+    metalness: 0.2,
+    fog: true
   });
 
-  // Create land mesh
-  const land = new THREE.Mesh(landGeometry, landMaterial);
-  land.rotation.x = -Math.PI / 2; // Make it horizontal
-  land.position.set(299, -26, 0); // Position it slightly above water
+  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  ground.rotation.x = -Math.PI / 2; // Lay flat
+  ground.position.y = -14.5;
+  scene.add(ground);
+}
 
-  // Add to scene
-  globalThis.land = land;
-  scene.add(land);
+async function loadSurroundings(){
+  const gltf = await loadModel("../glbs/surroundings.glb");
+  const model = gltf.scene;
+  model.position.set(0,10,0);
+  scene.add(model);
+}
+
+async function loadHysterStacker(){
+  const gltf = await loadModel("../glbs/hyster_stacker.glb");
+  const model = gltf.scene;
+  model.position.set(150, 0, 200);
+  model.rotateY(Math.PI/4);
+  scene.add(model);
+}
+
+async function loadTruck(){
+  const truck = new THREE.Group();
+  const gltf = await loadModel("../glbs/truck1.glb");
+  const model = gltf.scene;
+  truck.add(model);
+  const conGltf = await loadModel("../glbs/white_container.glb");
+  const container = conGltf.scene;
+  container.position.set(0,6,6);
+  truck.add(container);
+  globalThis.containerTruck = truck;
+}
+
+function getTruck(containerColor){
+  const truck = containerTruck.clone();
+
+  // Change container color for this specific truck
+  truck.traverse((child) => {
+    if (child.isMesh && child.parent === truck.children[1]) { // Target container (second child)
+      child.material = child.material.clone();
+      if (containerColor) {
+        child.material.color.set(containerColor); // Set color only if provided
+      }
+      child.material.needsUpdate = true;
+    }
+  });
+
+  return truck;
+}
+
+async function addParkingArea(){
+
+  const geometry = new THREE.BoxGeometry(1, 1, 126); // Adjust width/height for thickness
+  const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const lineMesh = new THREE.Mesh(geometry, material);
+  lineMesh.position.set(280, 0, 210.5);
+  scene.add(lineMesh);
+
+  for(let i = 0; i < 6; i++){
+    const geometry1 = new THREE.BoxGeometry(30, 1, 1); // Adjust width/height for thickness
+    const material1 = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const lotLine1 = new THREE.Mesh(geometry1, material1);
+    lotLine1.position.set(267, 0, 155.5 + i*25);
+    lotLine1.rotateY(Math.PI/6);
+    scene.add(lotLine1);
+  }
+
+  const truck1 = getTruck()
+  truck1.position.set(260,0,170);
+  truck1.rotateY(-Math.PI/3);
+  scene.add(truck1);
+
+  const truck2 = getTruck(0xff0000)
+  truck2.position.set(260,0,195);
+  truck2.rotateY(-Math.PI/3);
+  scene.add(truck2);
+
+  const truck3 = getTruck(0x6484f3)
+  truck3.position.set(260,0,245);
+  truck3.rotateY(-Math.PI/3);
+  scene.add(truck3);
 }
 
 async function createCustomRoad() {
-
   const barrierGltf = await loadModel("../glbs/automatic_boom_barriers.glb");
   const barrierModel = barrierGltf.scene;
-  barrierModel.scale.set(2, 2, 2);
-  barrierModel.position.set(270, 5, 222);
+  barrierModel.position.set(128, 0, 326);
   scene.add(barrierModel);
 
-  const points = [
-    new THREE.Vector3(300, 1, 230),
-    new THREE.Vector3(-170, 1, 230), // turn
-    new THREE.Vector3(-200, 1, 200), // turn
-    new THREE.Vector3(-200, 1, -52),
-    new THREE.Vector3(-170, 1, -82),
-    new THREE.Vector3(210, 1, -82),
-    new THREE.Vector3(240, 1, -52),
-    new THREE.Vector3(240, 1, 230),
+  const roadPoints = [
+    { straight: new THREE.Vector3(865, -0.3, 400) },
+    { straight: new THREE.Vector3(128, -0.3, 400) },
+    { right: new THREE.Vector3(84, -0.3, 360) },
+    { straight: new THREE.Vector3(84, -0.3, 326) },
   ];
 
-  const curvePath = new THREE.CurvePath();
-  curvePath.add(new THREE.LineCurve3(points[0], points[1]));
-  curvePath.add(
-    new THREE.QuadraticBezierCurve3(points[1], new THREE.Vector3(points[2].x, 1, points[1].z), points[2])
-  );
-  curvePath.add(new THREE.LineCurve3(points[2], points[3]));
-  curvePath.add(
-    new THREE.QuadraticBezierCurve3(points[3], new THREE.Vector3(points[3].x, 1, points[4].z), points[4])
-  );
-  curvePath.add(new THREE.LineCurve3(points[4], points[5]));
-  curvePath.add(
-    new THREE.QuadraticBezierCurve3(points[5], new THREE.Vector3(points[6].x, 1, points[5].z), points[6])
-  );
-  curvePath.add(new THREE.LineCurve3(points[6], points[7]));
-  globalThis.curve = curvePath;
+  await buildRoad(roadPoints);
 
-  const centerLineMaterial = new THREE.LineDashedMaterial({
-    color: 0xffffff, // White color for dashed lines
-    dashSize: 10, // Length of each dash
-    gapSize: 10, // Space between dashes
-    linewidth: 3,
-  });
-  
-  const centerLinePoints = [];
-  const divisions = 100; // Number of dashes
-  for (let i = 0; i <= divisions; i++) {
-    const t = i / divisions;
-    const point = curve.getPoint(t);
-    centerLinePoints.push(new THREE.Vector3(point.x, point.y + 0.05, point.z)); // Slightly raised
+  const gltf = await loadModel("../glbs/street_lamp.glb");
+  const streetLamp = gltf.scene;
+
+  streetLamp.scale.set(4, 4, 4);
+
+  for (let i = 0; i < 7; i++) {
+    const streetLampClone = streetLamp.clone();
+    streetLampClone.position.set(180 + i * 80, -5, roadPoints[0].straight.z - 15);
+    streetLampClone.rotateY(-Math.PI / 2);
+    scene.add(streetLampClone);
   }
-  
-  const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(centerLinePoints);
-  const centerLine = new THREE.Line(centerLineGeometry, centerLineMaterial);
-  centerLine.computeLineDistances(); // Needed for dashed lines to work
-  
-  scene.add(centerLine);
-
-  const shape = new THREE.Shape();
-  shape.moveTo(-8, 0); // Half road width to the left
-  shape.lineTo(8, 0); // Half road width to the right
-  shape.lineTo(8, 0.1); // Small height (or 0 for perfectly flat)
-  shape.lineTo(-8, 0.1); //
-  shape.closePath();
-
-  const extrudeSettings = {
-    steps: 5000, // Number of segments along the curve
-    depth: 0, // Set depth to 0 for a flat road
-    extrudePath: curve,
-  };
-
-  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  
-  const material = new THREE.MeshLambertMaterial({ color: 0x000000 });
-  material.needsUpdate = true;
-  const road = new THREE.Mesh(geometry, material);
-  globalThis.road = road;
-  scene.add(road);
 }
+
+async function addFencing() {
+  const gltf = await loadModel("../glbs/fence.glb");
+  const fence = gltf.scene;
+  fence.scale.set(2.15, 3, 2.15);
+
+  const fenceBoundingBox = new THREE.Box3().setFromObject(fence);
+  const fenceSize = new THREE.Vector3();
+  fenceBoundingBox.getSize(fenceSize);
+
+  // back
+  let initialPoint = new THREE.Vector3(-280, 0, -325);
+  for (let i = 0; i < 19; i++) {
+    const fenceClone = fence.clone();
+    fenceClone.position.copy(initialPoint);
+    fenceClone.position.x += i * (fenceSize.x * 0.65);
+    scene.add(fenceClone);
+  }
+
+  // right
+  initialPoint = new THREE.Vector3(292, 0, -310);
+
+  for (let i = 0; i < 21; i++) {
+    
+      const fenceClone = fence.clone();
+      fenceClone.rotation.y = Math.PI / 2;
+      fenceClone.position.copy(initialPoint);
+      fenceClone.position.z += i * (fenceSize.x * 0.65);
+      scene.add(fenceClone);
+  }
+
+  // front
+  initialPoint = new THREE.Vector3(-280, 0, 325);
+  for (let i = 0; i < 19; i++) {
+    if (i != 11 && i != 12 && i != 13) {
+      const fenceClone = fence.clone();
+      fenceClone.position.copy(initialPoint);
+      fenceClone.position.x += i * (fenceSize.x * 0.65);
+      scene.add(fenceClone);
+    }
+  }
+
+  // left
+  initialPoint = new THREE.Vector3(-297, 0, -310);
+
+  for (let i = 0; i < 21; i++) {
+    const fenceClone = fence.clone();
+    fenceClone.rotation.y = Math.PI / 2;
+    fenceClone.position.copy(initialPoint);
+    fenceClone.position.z += i * (fenceSize.x * 0.65);
+    scene.add(fenceClone);
+  }
+}
+
+function addClouds() {
+  const cloudGroup = new THREE.Group();
+
+  const cloudTexture = new THREE.TextureLoader().load("cloud.png");
+
+  for (let i = 0; i < 50; i++) {
+    const cloudMaterial = new THREE.SpriteMaterial({
+      map: cloudTexture,
+      transparent: true,
+      opacity: Math.random() * 0.5 + 0.5, // Random transparency
+    });
+
+    const cloud = new THREE.Sprite(cloudMaterial);
+    cloud.scale.set(300 + Math.random() * 100, 100 + Math.random() * 50, 1);
+
+    // Random positions
+    let x, z;
+    do {
+      x = (Math.random() - 0.5) * 1800;
+      z = (Math.random() - 0.5) * 1800;
+    } while (Math.abs(x) < 350 && Math.abs(z) < 350);
+    const y = Math.random() * 200 + 500; // Above ground
+    cloud.position.set(x, y, z);
+
+    cloudGroup.add(cloud);
+  }
+
+  scene.add(cloudGroup);
+}
+

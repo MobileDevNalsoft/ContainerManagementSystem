@@ -25,8 +25,7 @@ window.addContainer = async function (containerNbr, areaName) {
     targetObject.position.y + (count - 1) * containerSize.y,
     targetObject.position.z
   );
-  const customColor =
-    count == 1 ? new THREE.Color(0xff0000) : new THREE.Color(0xffffff); // Red color
+  const customColor = getColor(count-1); // Red color
 
   // Iterate through all the meshes in the container and apply the color to their materials
   containerClone.traverse((child) => {
@@ -268,7 +267,7 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
         object.parent.position.z == currentLotPosition.z
       ) {
         console.log(
-          `Object: ${object.name || object.uuid}, Position:`,
+          `Object: ${object.name || object.parent.uuid || containerSize.y/2}, Position:`,
           object.parent.position.x +
             " " +
             object.parent.position.y +
@@ -282,8 +281,7 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
             object.parent.position.z
           );
 
-          if (object.parent.position.y === 0) {
-            const customColor = new THREE.Color(0xff0000); // Red color
+            const customColor = getColor(object.parent.position.y/8.174938072837563);
 
             // Iterate through all the meshes in the container and apply the color to their materials
             object.traverse((child) => {
@@ -306,7 +304,6 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
                 }
               }
             });
-          }
 
           const currentTitle = scene.getObjectByName(
             globalThis.objData.get(object.parent.uuid).containerNbr
@@ -336,8 +333,7 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
 
   globalThis.objData.get(targetObject.parent?.uuid).lotNo = targetLot;
 
-  const customColor =
-    count == 1 ? new THREE.Color(0xff0000) : new THREE.Color(0xffffff); // Red color
+  const customColor = getColor(count-1);
 
   // Iterate through all the meshes in the container and apply the color to their materials
   targetObject.traverse((child) => {

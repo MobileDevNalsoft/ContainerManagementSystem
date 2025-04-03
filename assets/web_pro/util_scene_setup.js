@@ -15,7 +15,7 @@ window.initScene = async function () {
 
   addLights(scene);
 
-  const base = getBoxGeometry(600, 50, 600, 0x999999);
+  const base = getBoxGeometry(600, 50, 660, 0x999999);
 
   base.name = "YARD";
 
@@ -30,18 +30,6 @@ window.initScene = async function () {
   scene.add(base);
 
   await loadEnvironment(topLeftCorner);
-
-  // Create a GSAP timeline for smoother transitions
-  const timeline = gsap.timeline();
-
-  controls.enabled = false;
-  controls.enableDamping = false;
-
-  // Callbacks after animation completes
-  timeline.call(() => {
-    controls.enabled = true; // Re-enable controls after animation
-    controls.enableDamping = true; // Re-enable damping after animation
-  });
 
   window.addEventListener("resize", () => {
     camera.aspect = threeDView.clientWidth / threeDView.clientHeight;

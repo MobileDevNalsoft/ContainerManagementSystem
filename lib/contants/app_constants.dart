@@ -35,5 +35,11 @@ class AppConstants {
 
   static const GET_AREA_LOTS = 'get_area_lots';
   static const ADD_CONTAINER = 'add_container';
+  static const RELOCATE_CONTAINER = 'relocate_container';
   static const DELETE_CONTAINER = 'delete_container';
+
+  static const WORK_QUEUE = 'get_work_queue';
+
+  static const GET_AREA_DATA = 'get_area_data';
+  static const SEARCH_CONTAINER = 'search_container';
 }

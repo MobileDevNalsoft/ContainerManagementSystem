@@ -1,5 +1,36 @@
 import * as THREE from "three";
 
+window.startAnimations = function () {
+  createNodes();
+  // startTruckAnimation();
+  // startContainerHandlerAnimation();
+}
+
+
+window.startTruckAnimation = async function () {
+  const gltf = await loadModel("../glbs/truck.glb");
+  const model = gltf.scene;
+  const truckGroup = new THREE.Group();
+  truckGroup.add(model);
+  globalThis.truck = model;
+  globalThis.containerOnTruck = globalThis.container.clone();
+  containerOnTruck.position.set(
+    truck.position.x ,
+    truck.position.y + containerSize.y * 0.35,
+    truck.position.z - containerSize.z * 0.25
+  );
+  truckGroup.add(containerOnTruck);
+  globalThis.truckGroup = truckGroup;
+  scene.add(truckGroup);
+
+  getShortestPath(
+    ['r1', 'r452'],
+    truckGroup,
+    0xcc0066,
+  );
+}
+
+
 window.startAnimation = async function () {
   const gltf = await loadModel("../glbs/truck.glb");
   const model = gltf.scene;
@@ -17,7 +48,7 @@ window.startAnimation = async function () {
   globalThis.truckGroup = truckGroup;
   scene.add(truckGroup);
 
-  updateTruckMovement();
+  // updateTruckMovement();
 // truckGroup.position.set(300, 1, 230);
 // truckGroup.rotation.y = Math.PI;
 // truckAnimationLoop();
@@ -63,55 +94,49 @@ window.updateTruckMovement = function () {
   requestAnimationFrame(updateTruckMovement);
 };
 
-const combinedPath = [
-  new THREE.Vector3(300, 1, 230),
-  new THREE.Vector3(-170, 1, 230), // turn
-  new THREE.Vector3(-200, 1, 200), // turn
-  new THREE.Vector3(-200, 1, -52),
-  new THREE.Vector3(-170, 1, -82),
-  new THREE.Vector3(210, 1, -82),
-  new THREE.Vector3(240, 1, -52),
-  new THREE.Vector3(240, 1, 230),
-];
+window.startContainerHandlerAnimation = async function (){
+  const gltf = await loadModel("../glbs/container_handler.glb");
+  const model = gltf.scene;
+  model.rotateY(Math.PI / 2);
 
-let index = 0;
-async function moveTruck(delta) {
-  let SPEED = 15;
-
-  const targetPosition = combinedPath[index];
-  const direction = targetPosition.clone().sub(truckGroup.position);
-
-  const distanceSq = direction.lengthSq();
-  if (distanceSq > 0.05 * 0.05) {
-    direction.normalize();
-    // Calculate the target angle
-    const targetAngle = Math.atan2(-direction.z, direction.x);
-    // Get current angle and calculate the shortest path
-    let currentAngle = truckGroup.rotation.y;
-    const angleDifference =
-      THREE.MathUtils.euclideanModulo(
-        targetAngle - currentAngle + Math.PI,
-        Math.PI * 2
-      ) - Math.PI;
-
-    if (Math.abs(angleDifference) > 0.01) {
-      currentAngle += angleDifference * delta * 2; // Smoothly interpolate rotation
-      truckGroup.rotation.y = currentAngle;
-    }
-    const moveDistance = Math.min(delta * SPEED, Math.sqrt(distanceSq));
-    truckGroup.position.add(direction.multiplyScalar(moveDistance));
-  } else {
-    truckGroup.position.copy(targetPosition);
-    index += 1;
-    if(index == combinedPath.length-1){
-        index = 0;
-    }
-  }
+  // getShortestPath(
+  //   ['a31', 'a300'],
+  //   model,
+  //   0xcc0066,
+  // );
 }
 
-const clock = new THREE.Clock();
-function truckAnimationLoop() {
-  moveTruck(clock.getDelta());
+window.doGSAP = function (position, target) {
+  const timeline = gsap.timeline();
 
-  requestAnimationFrame(truckAnimationLoop);
-}
+  controls.enabled = false;
+
+  // Animate position and rotation simultaneously
+  timeline
+    .to(camera.position, {
+      duration: 3,
+      x: position.x,
+      y: position.y,
+      z: position.z,
+      ease: "power2.inOut",
+    })
+    .to(
+      controls.target,
+      {
+        duration: 3,
+        x: target.x,
+        y: target.y,
+        z: target.z,
+        ease: "power3.inOut",
+        onUpdate: function () {
+          camera.lookAt(controls.target); // Smoothly look at the target
+        },
+      },
+      "<"
+    );
+
+  // Callbacks after animation completes
+  timeline.call(() => {
+    controls.enabled = true; // Re-enable controls after animation
+  });
+};

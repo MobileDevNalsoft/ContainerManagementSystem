@@ -1,8 +1,15 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:warehouse_3d/bloc/authentication/authentication_bloc.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
+import 'package:warehouse_3d/bloc/damaged/damaged_bloc.dart';
+import 'package:warehouse_3d/bloc/dry/dry_bloc.dart';
+import 'package:warehouse_3d/bloc/frozen/empty_bloc.dart';
+import 'package:warehouse_3d/bloc/area/area_bloc.dart';
+import 'package:warehouse_3d/bloc/work_queue/work_queue_bloc.dart';
 import 'package:warehouse_3d/inits/init.dart';
 import 'navigations/route_generator.dart';
 
@@ -17,9 +24,17 @@ main() async {
     providers: [
       BlocProvider(create: (_) => ContainerInteractionBloc(networkCalls: getIt())),
       BlocProvider(create: (_) => AuthenticationBloc(navigator: getIt())),
+      BlocProvider(create: (_) => AreaBloc(networkCalls: getIt())),
+      BlocProvider(create: (_) => EmptyBloc(networkCalls: getIt())),
+      BlocProvider(create: (_) => DryBloc(networkCalls: getIt())),
+      BlocProvider(create: (_) => DamagedBloc(networkCalls: getIt())),
+      BlocProvider(create: (_) => WorkQueueBloc(networkCalls: getIt())),
     ],
     child: MaterialApp(
       navigatorKey: GlobalKey<NavigatorState>(),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus, PointerDeviceKind.unknown},
+      ),
       theme: ThemeData(fontFamily: 'Gilroy', colorScheme: ColorScheme.fromSeed(seedColor: Colors.white, primary: Colors.black)),
       debugShowCheckedModeBanner: false,
       initialRoute: '/containerManagement',

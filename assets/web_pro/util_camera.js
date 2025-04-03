@@ -1,65 +1,34 @@
 import * as THREE from "three";
 
 window.createCamera = function () {
+
+  const container = document.getElementById("container-yard-3dview");
+
   const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
+    30,
+    container.clientWidth / container.clientHeight,
     0.1,
-    3000
+    1000000
   );
 
   // Adjusted camera position
-  camera.position.set(0,340,200); // Set to view the scene correctly
+  camera.position.set(230,270,1000); // Set to view the scene correctly
 
   globalThis.camera = camera;
+
+  camera.updateProjectionMatrix();
 }
 
-window.switchCamera = function() {
-  const controls = globalThis.controls;
-  const camera = globalThis.camera;
-  const { position, target } = getPositionAndTarget();
+window.switchCamera = function(name) {
+  const { position, target } = getPositionAndTarget(name != null ? name : null);
 
-  // Create a GSAP timeline for smoother transitions
-  const timeline = gsap.timeline();
-
-  controls.enabled = false;
-  controls.enableDamping = false;
-
-  // Animate position and rotation simultaneously
-  timeline
-    .to(camera.position, {
-      duration: 3,
-      x: position.x,
-      y: position.y,
-      z: position.z,
-      ease: "power3.inOut",
-    })
-    .to(
-      controls.target,
-      {
-        duration: 3,
-        x: target.x,
-        y: target.y,
-        z: target.z,
-        ease: "power3.inOut",
-        onUpdate: function () {
-          camera.lookAt(controls.target); // Smoothly look at the target
-        },
-      },
-      "<"
-    );
-
-  // Callbacks after animation completes
-  timeline.call(() => {
-    controls.enabled = true; // Re-enable controls after animation
-    controls.enableDamping = true; // Re-enable damping after animation
-  });
+  doGSAP(position, target);
 }
 
-function getPositionAndTarget() {
+function getPositionAndTarget(name) {
   let position = new THREE.Vector3();
   let target = new THREE.Vector3(0, 0, 0);
-  const object = globalThis.targetObject;
+  const object = name!=null? scene.getObjectByName(name) : globalThis.targetObject;
   let box;
   const view = object.name.toString().split("_")[0];
 
@@ -70,20 +39,21 @@ function getPositionAndTarget() {
       case "EMPTY":
         position.set(
           object.position.x,
-          object.position.y + 100,
-          object.position.z + 50
+          380,
+          object.position.z + 283
         );
         box = new THREE.Box3().setFromObject(object);
         box.getCenter(target);
-        target.z = target.z + 15;
+        target.z = target.z + 45;
         break;
       case "YARD":
+        globalThis.areaFocused = false;
         position.set(
-          0,400,200
+          0,463,403
         );
         box = new THREE.Box3().setFromObject(object);
         box.getCenter(target);
-        target.z = 85;
+        target.z = -40;
         break;
   }
 

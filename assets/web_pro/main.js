@@ -15,14 +15,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   await buildAreas();
 
-  await startAnimation();
+  // await startAnimations();
 
   console.log('{"loaded":"100%"}');
 
-  const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
-    water.material.uniforms["time"].value += clock.getDelta() * 0.6;
     controls.update();
     renderer.render(scene, camera);
   }

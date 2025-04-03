@@ -59,6 +59,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   flutter_typeahead: ^5.2.0
   logger: ^2.5.0
+  flutter_spinkit: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +105,9 @@ flutter:
     - family: Gilroy
       fonts:
         - asset: assets/fonts/Gilroy.ttf
+    - family: Ethnocentric
+      fonts:
+        - asset: assets/fonts/Ethnocentric.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

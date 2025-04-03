@@ -6,19 +6,23 @@
   "areas":{
     "dryArea": {
       "name": "DRY",
-      "lotsPerRow": 10
+      "lotsPerRow": 25,
+      "levels": 3
     },
     "refrigeratedArea": {
       "name": "REFRIGERATED",
-      "lotsPerRow": 10
+      "lotsPerRow": 25,
+      "levels": 3
     },
     "damagedArea": {
       "name": "DAMAGED",
-      "lotsPerRow": 5
+      "lotsPerRow": 11,
+      "levels": 3
     },
     "emptyArea": {
       "name": "EMPTY",
-      "lotsPerRow": 5
+      "lotsPerRow": 11,
+      "levels": 3
     }
   }
 }

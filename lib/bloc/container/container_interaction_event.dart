@@ -33,6 +33,17 @@ class AddContainer extends ContainerInteractionEvent {
   List<Object> get props => [area, containerNbr, lotNo];
 }
 
+class RelocateContainer extends ContainerInteractionEvent {
+  final String area;
+  final String containerNbr;
+  final String lotNo;
+
+  RelocateContainer({required this.containerNbr, required this.lotNo, required this.area});
+
+  @override
+  List<Object> get props => [containerNbr, lotNo, area];
+}
+
 class DeleteContainer extends ContainerInteractionEvent {
   final String area;
   final String containerNbr;
@@ -40,4 +51,40 @@ class DeleteContainer extends ContainerInteractionEvent {
 
   @override
   List<Object> get props => [area, containerNbr];
+}
+
+class DataFromJS extends ContainerInteractionEvent {
+  final Map<String, dynamic> dataFromJS;
+
+  DataFromJS({required this.dataFromJS});
+
+  @override
+  List<Object> get props => [dataFromJS];
+}
+
+class Intercepting extends ContainerInteractionEvent {
+  final bool intercepting;
+
+  Intercepting({required this.intercepting});
+
+  @override
+  List<Object> get props => [intercepting];
+}
+
+class SearchContainer extends ContainerInteractionEvent {
+  final String containerNbr;
+
+  SearchContainer({required this.containerNbr});
+
+  @override
+  List<Object> get props => [containerNbr];
+}
+
+class SelectedArea extends ContainerInteractionEvent {
+  final AreaName selectedArea;
+
+  SelectedArea({required this.selectedArea});
+
+  @override
+  List<Object> get props => [selectedArea];
 }

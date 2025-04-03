@@ -33,6 +33,7 @@ window.addInteractions = function () {
             case "DRY":
             case "REFRIGERATED":
             case "EMPTY":
+            case "DAMAGED":
               const arrivalDate = containerData.arrivalTime.split(" ")[0];
               const detentionDays = getDaysDiff(arrivalDate);
               const detentionText =
@@ -44,18 +45,14 @@ window.addInteractions = function () {
                                             ${detentionText}
                                             </div>`;
               break;
-            case "DAMAGED":
-              tooltip.style.display = "block";
-              tooltip.innerHTML = `<strong>${containerData.containerNbr}</strong>`;
-              break;
           }
           setToolTipPosition(targetObject, tooltip, camera);
         }
-      } else if (name.includes("AREA") && areaFocused == false) {
+      } else if (name.includes("AREA")) {
         const areaLots = lotsData[`${name.toLowerCase()}`];
         const totalLots = Object.keys(areaLots).length;
         const availableLots = Object.keys(areaLots).filter(
-          (lot) => areaLots[lot].length < 2
+          (lot) => areaLots[lot].length < 3
         ).length;
         tooltip.style.display = "block";
         tooltip.innerHTML = `<strong>${name}</strong><div class="tooltip-content">
@@ -68,6 +65,11 @@ window.addInteractions = function () {
       } else if(name.includes('YARD')){
               tooltip.style.display = "block";
               tooltip.innerHTML = `<strong>YARD</strong>`;
+              tooltip.style.left = `${e.clientX + 10}px`; // Offset for better visibility
+              tooltip.style.top = `${e.clientY + 10}px`;
+      } else if(name.match(/r\d+/) || name.match(/a\d+/)){
+        tooltip.style.display = "block";
+              tooltip.innerHTML = `<strong>${name}</strong>`;
               tooltip.style.left = `${e.clientX + 10}px`; // Offset for better visibility
               tooltip.style.top = `${e.clientY + 10}px`;
       }
@@ -100,12 +102,36 @@ window.addInteractions = function () {
   function onMouseUp(e) {
     if (e.target.classList.contains("ignoreRaycast")) return;
 
-    const tooltip = document.getElementById("tooltip");
     raycaster.setFromCamera(mouse, camera);
     // This method sets up the raycaster to cast a ray from the camera into the 3D scene based on the current mouse position. It allows you to determine which objects in the scene are intersected by that ray.
     const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length === 0) return;
+
+    console.log(
+      'click point : '+
+      intersects[0].point.x +
+        " " +
+        intersects[0].point.y +
+        " " +
+        intersects[0].point.z
+    );
+    console.log(
+      'camera position : '+
+      camera.position.x +
+      " " +
+      camera.position.y +
+      " " +
+      camera.position.z
+    );
     const targetObject = intersects[0].object;
+    console.log(
+      'object position : '+
+      targetObject.position.x +
+        " " +
+        targetObject.position.y +
+        " " +
+        targetObject.position.z
+    );
     globalThis.targetObject = targetObject;
     const name = targetObject.name;
     console.warn("name:", name);
@@ -119,7 +145,7 @@ window.addInteractions = function () {
         const lotNo = name.split("_")[1];
         globalThis.lot = lotNo;
 
-        if (areaData && areaData[lotNo]?.length <= 3) {
+        if (areaData && areaData[lotNo]?.length <= 2) {
           console.log(JSON.stringify({ lotNo: lotNo, area: areaName }));
         }
       } else if (name.includes("Container")) {
@@ -136,9 +162,11 @@ window.addInteractions = function () {
         }
       } else if (name.includes("AREA")) {
         areaFocused = true;
+        console.log(JSON.stringify({ area: name }));
         switchCamera();
       } else if (name.includes('YARD')){
         switchCamera();
+        console.log('{"object":"null"}');
       }
     } else if ((lastPos.distanceTo(mouse) <= 0.01) & (e.button === 2)) {
       if (name.includes("Container")) {
@@ -154,6 +182,7 @@ window.addInteractions = function () {
       }
     }else {
       areaFocused = false;
+      console.log('{"object":"null"}');
     }
   }
 
@@ -163,6 +192,5 @@ window.addInteractions = function () {
 
   document.addEventListener("wheel", (event) => {
     tooltip.style.display = "none";
-    areaFocused = false;
   });
 };

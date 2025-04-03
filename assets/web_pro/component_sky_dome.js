@@ -5,7 +5,7 @@ window.addSkyDome = function() {
     const loader = new THREE.TextureLoader();
     loader.load("./sky_box.jpg", function (texture) {
       // Create a large sphere geometry for the skydome
-      const geometry = new THREE.SphereGeometry(800,  // Radius of the hemisphere
+      const geometry = new THREE.SphereGeometry(900,  // Radius of the hemisphere
         32,   // Width segments
         32,   // Height segments
         0,    // phiStart: Start angle in the X axis

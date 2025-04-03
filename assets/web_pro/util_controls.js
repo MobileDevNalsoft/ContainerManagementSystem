@@ -7,6 +7,7 @@ window.addControls = function (){
   controls.enableDamping = true; // Enable smooth movement
   controls.dampingFactor = 0.25;
   controls.zoomSpeed = 2;
+  controls.zoomToCursor = true;
   controls.screenSpacePanning = false;
   controls.panSpeed = 2;
 
@@ -22,9 +23,9 @@ window.addControls = function (){
   var maxPan;
 
   controls.minDistance = 10;
-  controls.maxDistance = 500;
-  minPan = new THREE.Vector3(-500, -500, -500);
-  maxPan = new THREE.Vector3(500, 500, 500);
+  controls.maxDistance = 1000;
+  minPan = new THREE.Vector3(-210, -210, -210);
+  maxPan = new THREE.Vector3(210, 210, 210);
 
   // Function to clamp target position
   function clampTarget() {

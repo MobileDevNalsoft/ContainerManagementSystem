@@ -4,33 +4,33 @@ window.buildAreas = async function () {
   buildArea(
     json.areas.dryArea,
     lotsData.dry_area,
-    new THREE.Vector3(-60, 0, 0),
-    0xd2b48c
+    new THREE.Vector3(-100, 0, -200),
+    0x999999
   );
   buildArea(
     json.areas.damagedArea,
     lotsData.damaged_area,
-    new THREE.Vector3(150, 0, 0),
-    0xe07d77
+    new THREE.Vector3(185, 0, -225),
+    0x999999
   );
   buildArea(
     json.areas.refrigeratedArea,
     lotsData.refrigerated_area,
-    new THREE.Vector3(-60, 0, 150),
-    0xadd8e6
+    new THREE.Vector3(-100, 0, 20),
+    0x999999
   );
   buildArea(
     json.areas.emptyArea,
     lotsData.empty_area,
-    new THREE.Vector3(150, 0, 150),
-    0xf5f5f5
+    new THREE.Vector3(185, 0, -5),
+    0x999999
   );
 };
 
 let lots = [];
 let containers = [];
 let dragControls;
-const rowGap = 10;
+const rowGap = 3;
 const columnGap = 20;
 const padding = 40;
 
@@ -54,14 +54,41 @@ async function buildArea(areaJson, areaLotsData, position, color) {
 
   area.name = areaJson.name + "_AREA";
 
-  const edges = new THREE.EdgesGeometry(area.geometry); // Get edges of the box
-  const borderMaterial = new THREE.LineBasicMaterial({
-    color: 0x000000,
-    linewidth: 2,
-  }); // Black border
-  const border = new THREE.LineSegments(edges, borderMaterial);
-  border.position.copy(area.position); // Align border with lot
-  areaGroup.add(border); // Add border to the scene
+  const edges = new THREE.EdgesGeometry(area.geometry);
+  const edgePositions = edges.attributes.position.array; // Vertex positions
+  const borderGroup = new THREE.Group();
+
+  for (let i = 0; i < edgePositions.length; i += 6) {
+    const start = new THREE.Vector3(
+      edgePositions[i],
+      edgePositions[i + 1],
+      edgePositions[i + 2]
+    );
+    const end = new THREE.Vector3(
+      edgePositions[i + 3],
+      edgePositions[i + 4],
+      edgePositions[i + 5]
+    );
+
+    // Create a thin box along the edge
+    const direction = end.clone().sub(start);
+    const length = direction.length();
+    const geometry = new THREE.BoxGeometry(length, 1, 1); // Adjust width/height for thickness
+    const material = new THREE.MeshBasicMaterial({ color: getBorderColor(areaJson.name) });
+    const edgeMesh = new THREE.Mesh(geometry, material);
+
+    // Position and orient the mesh
+    edgeMesh.position.copy(start).lerp(end, 0.5); // Center between start and end
+    edgeMesh.quaternion.setFromUnitVectors(
+      new THREE.Vector3(1, 0, 0),
+      direction.normalize()
+    );
+
+    borderGroup.add(edgeMesh);
+  }
+
+  borderGroup.position.copy(area.position);
+  areaGroup.add(borderGroup);
 
   const areaCenter = new THREE.Vector3();
   area.updateMatrixWorld();
@@ -106,7 +133,7 @@ async function buildArea(areaJson, areaLotsData, position, color) {
   for (let i = 0; i < totalRows; i++) {
     for (let j = 0; j < totalColumns; j++) {
       const lotGroup = new THREE.Group();
-      const lot = getBoxGeometry(lotWidth, 0.1, lotDepth, 0xe6e6e6);
+      const lot = getBoxGeometry(lotWidth, 0.1, lotDepth, 0x999999);
       lot.position.set(
         topLeftCorner.x +
           lotWidth / 2 +
@@ -132,13 +159,13 @@ async function buildArea(areaJson, areaLotsData, position, color) {
       const border = new THREE.LineSegments(edges, borderMaterial);
       border.position.copy(lot.position); // Align border with lot
       lotGroup.add(border); // Add border to the scene
-      
+
       const lotCenter = new THREE.Vector3();
       lot.updateMatrixWorld();
       lot.getWorldPosition(lotCenter);
-      
+
       const serialNumber = i + 1 + totalRows * j;
-      
+
       await ThreeDText(serialNumber.toString(), 1, 0.1).then((title) => {
         const titleBoundingBox = new THREE.Box3().setFromObject(title);
         const titleSize = new THREE.Vector3();
@@ -151,84 +178,107 @@ async function buildArea(areaJson, areaLotsData, position, color) {
         );
         lotGroup.add(title);
       });
-      
+
       scene.add(lotGroup);
-      
+
       let lotNo = "lot" + (i + 1 + totalRows * j);
       lot.name = areaJson.name + "_" + lotNo;
-      border.name = lot.name+'_border';
+      border.name = lot.name + "_border";
       lot.userData = {
         area: areaJson.name,
       };
       lots.push(lotGroup);
 
-      for (let i = 0; i < areaLotsData[lotNo].length; i++) {
-        const containerGroup = new THREE.Group();
-        const containerClone = container.clone();
-        containerClone.position.set(
-          lot.position.x,
-          lot.position.y + i * containerSize.y,
-          lot.position.z
-        );
-        const customColor = i == 0 ? new THREE.Color(0xff0000) : new THREE.Color(0xffffff); // Red color
+      // for (let i = 0; i < areaLotsData[lotNo].length; i++) {
+        // const containerGroup = new THREE.Group();
+        // const containerClone = container.clone();
+        // containerClone.position.set(
+        //   lot.position.x,
+        //   lot.position.y + i * containerSize.y,
+        //   lot.position.z
+        // );
+        // const customColor = getColor();
 
-        // Iterate through all the meshes in the container and apply the color to their materials
-        containerClone.traverse((child) => {
-          if (child.isMesh) {
-            // For each mesh, check if it has a material and apply the color
-            if (child.material) {
-              // Clone the material so that each container has its own unique material
-              if (Array.isArray(child.material)) {
-                // Handle cases where multiple materials exist for a mesh (array of materials)
-                child.material.forEach((material) => {
-                  material = material.clone(); // Clone the material
-                  material.color.set(customColor); // Set the custom color
-                  child.material = material; // Apply the cloned material back to the mesh
-                });
-              } else {
-                // Single material for the mesh
-                child.material = child.material.clone(); // Clone the material
-                child.material.color.set(customColor); // Set the custom color
-              }
-            }
-          }
-        });
-        containerGroup.add(containerClone);
+        // // Iterate through all the meshes in the container and apply the color to their materials
+        // containerClone.traverse((child) => {
+        //   if (child.isMesh) {
+        //     // For each mesh, check if it has a material and apply the color
+        //     if (child.material) {
+        //       // Clone the material so that each container has its own unique material
+        //       if (Array.isArray(child.material)) {
+        //         // Handle cases where multiple materials exist for a mesh (array of materials)
+        //         child.material.forEach((material) => {
+        //           material = material.clone(); // Clone the material
+        //           material.color.set(customColor); // Set the custom color
+        //           child.material = material; // Apply the cloned material back to the mesh
+        //         });
+        //       } else {
+        //         // Single material for the mesh
+        //         child.material = child.material.clone(); // Clone the material
+        //         child.material.color.set(customColor); // Set the custom color
+        //       }
+        //     }
+        //   }
+        // });
+        // containerGroup.add(containerClone);
 
-        await ThreeDText(
-          areaLotsData[lotNo][i].container_nbr,
-          1,
-          0.1,
-          0xffffff
-        ).then((title) => {
-          const titleBoundingBox = new THREE.Box3().setFromObject(title);
-          const titleSize = new THREE.Vector3();
-          titleBoundingBox.getSize(titleSize);
-          title.raycast = () => {};
-          title.rotation.y = Math.PI / 2;
-          title.position.set(
-            containerClone.position.x + containerSize.x / 2,
-            containerClone.position.y + containerSize.y / 2,
-            containerClone.position.z + titleSize.x / 2
-          );
-          title.name = areaLotsData[lotNo][i].container_nbr;
-          containerGroup.add(title);
-        });
-        scene.add(containerGroup);
-        const uuid = containerClone.uuid;
-        globalThis.objData.set(uuid, {
-          containerNbr: areaLotsData[lotNo][i].container_nbr,
-          arrivalTime: areaLotsData[lotNo][i]?.arrival_time,
-          customerName: areaLotsData[lotNo][i]?.customer_name,
-          area: areaJson.name,
-          lotNo: lotNo,
-        });
-        containers.push(containerClone);
-      }
+        // await ThreeDText(
+        //   areaLotsData[lotNo][i].container_nbr,
+        //   1,
+        //   0.1,
+        //   0xffffff
+        // ).then((title) => {
+        //   const titleBoundingBox = new THREE.Box3().setFromObject(title);
+        //   const titleSize = new THREE.Vector3();
+        //   titleBoundingBox.getSize(titleSize);
+        //   title.raycast = () => {};
+        //   title.rotation.y = Math.PI / 2;
+        //   title.position.set(
+        //     containerClone.position.x + containerSize.x / 2,
+        //     containerClone.position.y + containerSize.y / 2,
+        //     containerClone.position.z + titleSize.x / 2
+        //   );
+        //   title.name = areaLotsData[lotNo][i].container_nbr;
+        //   containerGroup.add(title);
+        // });
+        // scene.add(containerGroup);
+        // const uuid = containerClone.uuid;
+        // globalThis.objData.set(uuid, {
+        //   containerNbr: areaLotsData[lotNo][i].container_nbr,
+        //   arrivalTime: areaLotsData[lotNo][i]?.arrival_time,
+        //   customerName: areaLotsData[lotNo][i]?.customer_name,
+        //   area: areaJson.name,
+        //   lotNo: lotNo,
+        // });
+        // containers.push(containerClone);
+      // }
     }
   }
   globalThis.containers = containers;
 }
+
+window.getColor = function () {
+  const colors = [0xff0000, 0x6cc24a, 0x6484f3, 0xbd7c3b];
+
+  const randomIndex = Math.floor(Math.random() * colors.length);
+  
+  return new THREE.Color(colors[randomIndex]);
+};
+
+
+window.getBorderColor = function (area) {
+  switch (area) {
+    case 'DRY':
+      return new THREE.Color(0x00B7EB);
+    case 'REFRIGERATED':
+      return new THREE.Color(0xc2f530);
+    case 'DAMAGED':
+      return new THREE.Color(0xd46942);
+    case 'EMPTY':
+      return new THREE.Color(0xe5e5e5);
+  }
+};
+
 
 function enableDragging() {
   dragControls = new DragControls(containers, camera, renderer.domElement);

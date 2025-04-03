@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSM Surroundings in Three.js</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js",
+          "orbitControls": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "orbitControls";
+
+      // 🌍 Reference Lat/Lon & Scaling Factor
+      const REF_LAT = 52.51836;
+      const REF_LON = 13.40438;
+      const SCALE_FACTOR = 1000; // Adjust for scene size
+
+      let scene, camera, renderer, controls;
+      init();
+      loadGeoJSON("./surroundings.geojson");
+
+      // 🔹 Initialize Three.js Scene
+      function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xa0c0ff);
+
+        camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          50000
+        );
+        camera.position.set(0, 500, 800);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // 🌄 Terrain (Realistic Ground)
+        const groundTexture = new THREE.TextureLoader().load(
+          "https://threejs.org/examples/textures/terrain/grasslight-big.jpg"
+        );
+        groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+        groundTexture.repeat.set(10, 10);
+
+        const groundMaterial = new THREE.MeshStandardMaterial({
+          map: groundTexture,
+        });
+        const ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(5000, 5000),
+          groundMaterial
+        );
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
+
+        // 🌞 Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(100, 500, 100);
+        scene.add(directionalLight);
+
+        animate();
+      }
+
+      // 🔄 Animation Loop
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      // 📌 Convert Lat/Lon to Three.js Coordinates
+      function convertLatLonToThreeJS(lat, lon) {
+        return {
+          x: (lon - REF_LON) * SCALE_FACTOR,
+          z: (lat - REF_LAT) * -SCALE_FACTOR,
+        };
+      }
+
+      // 🏗 Load and Render GeoJSON Data
+      async function loadGeoJSON(url) {
+        try {
+          const response = await fetch(url);
+          const geojson = await response.json();
+
+          geojson.features.forEach((feature) => {
+            if (feature.properties.building) {
+              addBuilding(feature);
+            } else {
+              addLine(feature);
+            }
+          });
+        } catch (error) {
+          console.error("Error loading GeoJSON:", error);
+        }
+      }
+
+      // 🏢 Add 3D Building
+      function addBuilding(feature) {
+        let coordinates = feature.geometry.coordinates[0];
+        if (feature.geometry.type === "multipolygon") {
+          coordinates = feature.geometry.coordinates[0][0];
+        }
+
+        const shape = new THREE.Shape();
+        let firstPoint = null;
+        coordinates.forEach(([lon, lat], index) => {
+          const { x, z } = convertLatLonToThreeJS(lat, lon);
+          if (index === 0) {
+            shape.moveTo(x, z);
+            firstPoint = { x, z };
+          } else {
+            shape.lineTo(x, z);
+          }
+        });
+
+        if (!firstPoint) return;
+        const height = 50 + Math.random() * 50;
+
+        const geometry = new THREE.ExtrudeGeometry(shape, {
+          depth: height,
+          bevelEnabled: false,
+        });
+        geometry.rotateX(-Math.PI / 2);
+
+        const material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+        const building = new THREE.Mesh(geometry, material);
+        building.position.set(firstPoint.x, height / 2, firstPoint.z);
+        scene.add(building);
+      }
+
+      // 🛣️ Add Roads & Outlines
+      function addLine(feature) {
+        if (!feature.geometry.coordinates) return;
+
+        const vectorLines = feature.geometry.coordinates.map((line) =>
+          line.map(([lon, lat]) => {
+            const { x, z } = convertLatLonToThreeJS(lat, lon);
+            return new THREE.Vector3(x, 0.1, z);
+          })
+        );
+
+        vectorLines.forEach((lineLoop) => {
+          const geometry = new THREE.BufferGeometry().setFromPoints(lineLoop);
+          const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+          const line = new THREE.LineLoop(geometry, material);
+          scene.add(line);
+        });
+      }
+    </script>
+  </body>
+</html>

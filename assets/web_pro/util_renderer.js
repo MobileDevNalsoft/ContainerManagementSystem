@@ -1,18 +1,21 @@
 import * as THREE from "three";
 
-window.createRenderer = function (){
+window.createRenderer = function () {
   const renderer = new THREE.WebGLRenderer({
-      canvas: threeCanvas,
-      antialias: true,
-      alpha: true,
-      logarithmicDepthBuffer: true,
-      preserveDrawingBuffer: true,
-    });
+    canvas: threeCanvas,
+    antialias: true,
+    alpha: true,
+    logarithmicDepthBuffer: true,
+    preserveDrawingBuffer: true,
+  });
   renderer.setPixelRatio(Math.min(Math.max(1, window.devicePixelRatio), 2));
-  
+
   // PMREM Generator for improved environment lighting
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   pmremGenerator.compileEquirectangularShader();
 
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
   globalThis.renderer = renderer;
-}
+};
