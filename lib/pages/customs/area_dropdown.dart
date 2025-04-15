@@ -33,22 +33,6 @@ class _AreaDropDownState extends State<AreaDropDown> {
     return DropdownButtonHideUnderline(
       child: DropdownButton2(
         isExpanded: true,
-        hint: Row(
-          children: [
-            Gap(size.width * 0.02),
-            Expanded(
-              child: Text(
-                'Select Item',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(111, 54, 167, 1),
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
         items: items
             .map((String item) => DropdownMenuItem<String>(
                   value: item,
@@ -56,7 +40,6 @@ class _AreaDropDownState extends State<AreaDropDown> {
                     item,
                     style: const TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
                       color: Color.fromRGBO(111, 54, 167, 1),
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -64,6 +47,7 @@ class _AreaDropDownState extends State<AreaDropDown> {
                 ))
             .toList(),
         value: selectedValue,
+        style: TextStyle(fontSize: 18),
         onChanged: (String? value) {
           setState(() {
             selectedValue = value;
@@ -79,7 +63,7 @@ class _AreaDropDownState extends State<AreaDropDown> {
             border: Border.all(
               color: Color.fromRGBO(111, 54, 167, 1),
             ),
-            color: const Color.fromRGBO(164, 111, 218, 1),
+            color: Color.fromRGBO(242, 228, 255, 1),
           ),
         ),
         iconStyleData: const IconStyleData(
@@ -87,12 +71,17 @@ class _AreaDropDownState extends State<AreaDropDown> {
             Icons.arrow_forward_ios_outlined,
           ),
           iconSize: 14,
+          openMenuIcon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 14,
+          ),
           iconEnabledColor: Color.fromRGBO(111, 54, 167, 1),
-          iconDisabledColor: Colors.grey,
+          iconDisabledColor: Color.fromRGBO(111, 54, 167, 1),
         ),
         dropdownStyleData: DropdownStyleData(
           maxHeight: size.height * 0.25,
-          width: size.height * 0.2,
+          width: size.height * 0.385,
+          offset: Offset(0, -size.height * 0.006),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             color: const Color.fromRGBO(164, 111, 218, 1),

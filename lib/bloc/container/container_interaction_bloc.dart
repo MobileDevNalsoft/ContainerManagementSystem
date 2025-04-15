@@ -36,6 +36,7 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
     on<DataFromJS>(_onDataFromJS);
     on<SelectedArea>(_onSelectedArea);
     on<DropdownAreaChanged>(_onDropdownAreaChanged);
+    on<DropdownLotChanged>(_onDropdownLotChanged);
   }
 
   Future<void> _cacheLotsData(Map<String, dynamic> data) async {
@@ -158,5 +159,9 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
 
   void _onDropdownAreaChanged(DropdownAreaChanged event, Emitter<ContainerInteractionState> emit) {
     emit(state.copyWith(selectedDropdownArea: event.area));
+  }
+
+  void _onDropdownLotChanged(DropdownLotChanged event, Emitter<ContainerInteractionState> emit) {
+    emit(state.copyWith(selectedDropdownLot: event.lotNo));
   }
 }

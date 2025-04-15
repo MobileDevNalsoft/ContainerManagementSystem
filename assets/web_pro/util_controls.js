@@ -24,8 +24,8 @@ window.addControls = function (){
 
   controls.minDistance = 10;
   controls.maxDistance = 1000;
-  minPan = new THREE.Vector3(-210, -210, -210);
-  maxPan = new THREE.Vector3(210, 210, 210);
+  minPan = new THREE.Vector3(-230, -230, -230);
+  maxPan = new THREE.Vector3(230, 230, 230);
 
   // Function to clamp target position
   function clampTarget() {

@@ -21,6 +21,7 @@ final class ContainerInteractionState {
       this.searchText,
       this.selectedAreaIndex,
       this.selectedDropdownArea,
+      this.selectedDropdownLot,
       this.selectedAreaName,
       this.searchTextController});
 
@@ -38,6 +39,7 @@ final class ContainerInteractionState {
   int? selectedAreaIndex;
   AreaName? selectedAreaName;
   String? selectedDropdownArea;
+  String? selectedDropdownLot;
   TextEditingController? searchTextController;
 
   factory ContainerInteractionState.initial() {
@@ -60,6 +62,7 @@ final class ContainerInteractionState {
       AddContainerStatus? getAddContainerStatus,
       Map<String, dynamic>? dataFromJS,
       String? selectedDropdownArea,
+      String? selectedDropdownLot,
       bool? intercepting,
       Areas? areas,
       bool? sentDataToJS,
@@ -80,6 +83,7 @@ final class ContainerInteractionState {
         sentDataToJS: sentDataToJS ?? this.sentDataToJS,
         selectedAreaName: selectedAreaName ?? this.selectedAreaName,
         selectedDropdownArea: selectedDropdownArea ?? this.selectedDropdownArea,
+        selectedDropdownLot: selectedDropdownLot ?? this.selectedDropdownLot,
         modelLoaded: modelLoaded ?? this.modelLoaded);
   }
 }

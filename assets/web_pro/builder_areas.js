@@ -65,6 +65,7 @@ async function buildArea(areaJson, areaLotsData, position, color) {
   const edges = new THREE.EdgesGeometry(area.geometry);
   const edgePositions = edges.attributes.position.array; // Vertex positions
   const borderGroup = new THREE.Group();
+  borderGroup.name = area.name + '_BORDER'
 
   for (let i = 0; i < edgePositions.length; i += 6) {
     const start = new THREE.Vector3(
@@ -293,7 +294,7 @@ window.getBorderColor = function (area) {
     case "DAMAGED":
       return new THREE.Color(0xd46942);
     case "EMPTY":
-      return new THREE.Color(0xe5e5e5);
+      return new THREE.Color(0x9c9391);
     case "UNASSIGNED":
       return new THREE.Color(0xe5e5e5);
   }

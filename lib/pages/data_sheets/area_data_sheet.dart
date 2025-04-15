@@ -50,7 +50,9 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
         size: size,
         title: '${widget.area} AREA',
         onExit: () {
-          if (pageController.hasClients && pageController.page == 1) {
+          if (pageController.hasClients && pageController.page == 2) {
+            pageController.animateToPage(1, duration: const Duration(milliseconds: 500), curve: Curves.linear);
+          } else if (pageController.hasClients && pageController.page == 1) {
             pageController.animateToPage(0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
           } else {
             _containerInteractionBloc.add(DataFromJS(dataFromJS: const {"object": "null"}));
@@ -290,6 +292,8 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                                     onTap: () {
                                                       _areaBloc.add(SelectedContainer(index: index));
                                                       if (widget.area == 'UNASSIGNED') {
+                                                        _containerInteractionBloc.state.selectedDropdownLot = null;
+                                                        _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'switchCamera("YARD")');
                                                         pageController.animateToPage(2, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                                                       }
                                                     },
@@ -367,7 +371,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                     ),
                                   ),
                                   Container(
-                                    height: lsize.maxHeight * 0.5,
+                                    height: lsize.maxHeight * 0.56,
                                     width: lsize.maxWidth * 0.95,
                                     padding: EdgeInsets.all(lsize.maxHeight * 0.02),
                                     decoration: BoxDecoration(
@@ -414,7 +418,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                         ),
                                         AreaDropDown(),
                                         Padding(
-                                          padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.03),
+                                          padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.03, bottom: lsize.maxHeight * 0.02),
                                           child: Text(
                                             'Lot',
                                             style: TextStyle(
@@ -425,21 +429,51 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                         BlocBuilder<ContainerInteractionBloc, ContainerInteractionState>(builder: (context, state) {
                                           print('selected Area ${state.selectedDropdownArea}');
                                           return LotDropdown(
+                                            selectedLot: state.selectedDropdownLot ?? 'Select Lot',
                                             suggestionsCallback: (pattern) {
                                               print('selected Area in ${state.selectedDropdownArea}');
-                                              return state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'].keys
+                                              List<String> lots = List.generate(
+                                                state.lotsData![state.selectedDropdownArea!.toUpperCase()]['max_lots'],
+                                                (index) => '${state.selectedDropdownArea!}_${index + 1}',
+                                              );
+                                              return lots
                                                   .where((e) =>
-                                                      e.contains(pattern) && state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'][e].length < 3)
-                                                  .toList()
-                                                ..sort((a, b) {
-                                                  // Extract numbers from lot names
-                                                  int numA = int.tryParse(RegExp(r'\d+').firstMatch(a)?.group(0) ?? '0') ?? 0;
-                                                  int numB = int.tryParse(RegExp(r'\d+').firstMatch(b)?.group(0) ?? '0') ?? 0;
-                                                  return numA.compareTo(numB);
-                                                });
+                                                      e.contains(pattern) &&
+                                                      (state.lotsData![state.selectedDropdownArea!.toUpperCase()]!['lots'].containsKey(e.toUpperCase()) &&
+                                                              state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'][e.toUpperCase()].length < 3 ||
+                                                          !state.lotsData![state.selectedDropdownArea!.toUpperCase()]!['lots'].containsKey(e.toUpperCase())))
+                                                  .toList();
                                             },
                                           );
-                                        })
+                                        }),
+                                        Gap(lsize.maxHeight * 0.055),
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: ElevatedButton(
+                                              onPressed: () {
+                                                if (_containerInteractionBloc.state.selectedDropdownLot != null) {
+                                                  _containerInteractionBloc.state.webViewController!.evaluateJavascript(
+                                                      source:
+                                                          'relocateContainer("${_containerInteractionBloc.state.selectedDropdownLot!.toUpperCase()}","${state.customers![state.selectedCustomerIndex!].containers![state.selectedContainerIndex!].containerNbr!}","${_containerInteractionBloc.state.selectedAreaName!.name.toUpperCase()}","${_containerInteractionBloc.state.selectedDropdownArea!.toUpperCase()}");');
+                                                  Future.delayed(
+                                                      Duration(seconds: 3),
+                                                      () => _containerInteractionBloc.state.webViewController!.evaluateJavascript(
+                                                          source:
+                                                              'switchCamera("${_containerInteractionBloc.state.selectedAreaName!.name.toUpperCase()}_AREA")'));
+                                                  pageController.animateToPage(1, duration: const Duration(milliseconds: 500), curve: Curves.linear);
+                                                } else {
+                                                  Customs.CMSFlushbar(size, context,
+                                                      icon: Icon(Icons.error_outline_rounded), message: 'Please select Lot Number');
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                                  foregroundColor: Color.fromRGBO(111, 54, 167, 1),
+                                                  backgroundColor: const Color.fromRGBO(164, 111, 218, 1)),
+                                              child: Text(
+                                                'Relocate',
+                                              )),
+                                        )
                                       ],
                                     ),
                                   ),

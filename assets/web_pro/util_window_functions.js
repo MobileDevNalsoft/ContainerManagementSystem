@@ -33,7 +33,7 @@ window.addContainer = async function (containerNbr, areaName) {
     targetObject.position.y + (count - 1) * containerSize.y,
     targetObject.position.z
   );
-  const customColor = getColor(count-1); // Red color
+  const customColor = getColor(); // Red color
 
   // Iterate through all the meshes in the container and apply the color to their materials
   containerClone.traverse((child) => {
@@ -216,22 +216,28 @@ window.deleteContainer = function (containerNbr) {
   scene.updateMatrixWorld(true);
 };
 
-window.relocateContainer = function (targetLot, targetContainer, areaName) {
+window.relocateContainer = function (targetLot, targetContainer, areaName, targetAreaName) {
   const scene = globalThis.scene;
-  const targetObject = globalThis.targetObject;
-  const currentLot = globalThis.objData.get(targetObject.parent?.uuid).lotNo;
-  console.log("lotNo " + currentLot);
+  const targetObject = scene.getObjectByName('CON_'+targetContainer);
+  const currentLot = globalThis.objData.get(targetObject?.uuid).lotNo;
+  console.warn("lotNo " + currentLot);
   const containerSize = globalThis.containerSize;
-  const lotsData = globalThis.lotsData[`${areaName.toLowerCase()}_area`];
+  const lotsData = globalThis.lotsData[`${areaName}`]['lots'];
+  console.warn('data '+JSON.stringify(lotsData));
+  console.warn('current lot data before filter '+JSON.stringify(lotsData[currentLot]));
   lotsData[currentLot] = lotsData[currentLot].filter(
-    (obj) => obj.container_nbr != targetContainer
+    (obj) => obj.shipment != targetContainer
   );
-  lotsData[targetLot].push({ containerNbr: targetContainer });
-  const count = lotsData[targetLot].length;
-  const targetLotObj = scene.getObjectByName(areaName + "_" + targetLot);
+  console.warn('current lot data after filter '+lotsData[currentLot]);
+
+  const targetAreaLotsData = globalThis.lotsData[`${targetAreaName}`]['lots'];
+  targetAreaLotsData[targetLot].push({ shipment: targetContainer, lvl: targetAreaLotsData[targetLot].length+1 });
+  console.warn('target lot data '+targetAreaLotsData[targetLot]);
+  const count = targetAreaLotsData[targetLot].length;
+  const targetLotObj = scene.getObjectByName(targetLot);
   const targetLotPosition = targetLotObj.position;
   const currentLotPosition = scene.getObjectByName(
-    areaName + "_" + currentLot
+    currentLot
   ).position;
 
   const targetTitle = scene.getObjectByName(targetContainer);
@@ -247,7 +253,7 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
     if (object.isMesh) {
       // Ensure it's a 3D object, not a Group or Light
       if (
-        object.name.includes("Container") &&
+        object.name.includes("CON") &&
         object.parent.position.x == currentLotPosition.x &&
         object.parent.position.z == currentLotPosition.z
       ) {
@@ -259,14 +265,14 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
             " " +
             object.parent.position.z
         );
-        if (object.parent.position.y > targetObject.parent.position.y) {
+        if (object.parent.position.y > targetObject.position.y) {
           object.parent.position.set(
             object.parent.position.x,
             object.parent.position.y - topCon * containerSize.y,
             object.parent.position.z
           );
 
-            const customColor = getColor(object.parent.position.y/8.174938072837563);
+            const customColor = getColor();
 
             // Iterate through all the meshes in the container and apply the color to their materials
             object.traverse((child) => {
@@ -310,15 +316,15 @@ window.relocateContainer = function (targetLot, targetContainer, areaName) {
     }
   });
 
-  targetObject.parent.position.set(
+  targetObject.position.set(
     targetLotPosition.x,
     targetLotPosition.y + (count - 1) * containerSize.y,
     targetLotPosition.z
   );
 
-  globalThis.objData.get(targetObject.parent?.uuid).lotNo = targetLot;
+  globalThis.objData.get(targetObject?.uuid).lotNo = targetLot;
 
-  const customColor = getColor(count-1);
+  const customColor = getColor();
 
   // Iterate through all the meshes in the container and apply the color to their materials
   targetObject.traverse((child) => {
