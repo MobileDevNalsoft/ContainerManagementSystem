@@ -36,7 +36,8 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
     }
     _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.firstWhere((e) => e.name == initcapcase(widget.area))));
     _areaBloc.state.selectedCustomerIndex = 0;
-    _containerInteractionBloc.state.selectedDropdownArea = 'Refrigerated';
+    print("widget area"+widget.area);
+    _containerInteractionBloc.state.selectedDropdownArea = widget.area.toLowerCase()=='unassigned'?'Refrigerated':widget.area.toLowerCase();
     // you will get the searched container area data
     // find the customer index from customers in area data then animate page with selected customer then container index using the customer data
     // then animate scroll to that container index.
@@ -288,10 +289,11 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                                 Expanded(
                                                   child: InkWell(
                                                     onTap: () {
-                                                      _areaBloc.add(SelectedContainer(index: index));
-                                                      if (widget.area == 'UNASSIGNED') {
+                                                      _areaBloc.add(SelectedContainer(index: index, ));
+                                                      context.read<ContainerInteractionBloc>().state.lotOfSelectedShipment = container.lotNo!;
+                                                      // if (widget.area == 'UNASSIGNED') {
                                                         pageController.animateToPage(2, duration: const Duration(milliseconds: 500), curve: Curves.linear);
-                                                      }
+                                                      // }
                                                     },
                                                     child: Container(
                                                       height: double.infinity,
@@ -412,7 +414,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                             ),
                                           ),
                                         ),
-                                        AreaDropDown(),
+                                        AreaDropDown(selectdAreaDropdown: context.read<ContainerInteractionBloc>().state.selectedDropdownArea.toString().toLowerCase()=='unassigned'?'Refrigerated':context.read<ContainerInteractionBloc>().state.selectedDropdownArea,),
                                         Padding(
                                           padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.03),
                                           child: Text(
@@ -429,7 +431,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                               print('selected Area in ${state.selectedDropdownArea}');
                                               return state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'].keys
                                                   .where((e) =>
-                                                      e.contains(pattern) && state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'][e].length < 3)
+                                                      e.contains(pattern) && e!=state.lotOfSelectedShipment && state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'][e].length < 3)
                                                   .toList()
                                                 ..sort((a, b) {
                                                   // Extract numbers from lot names
