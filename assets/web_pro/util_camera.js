@@ -37,9 +37,10 @@ function getPositionAndTarget(name) {
       case "REFRIGERATED":
       case "DAMAGED":
       case "EMPTY":
+      case "UNASSIGNED":
         position.set(
           object.position.x,
-          380,
+          390,
           object.position.z + 283
         );
         box = new THREE.Box3().setFromObject(object);
@@ -49,11 +50,11 @@ function getPositionAndTarget(name) {
       case "YARD":
         globalThis.areaFocused = false;
         position.set(
-          0,463,403
+          0,750,688.7 
         );
         box = new THREE.Box3().setFromObject(object);
         box.getCenter(target);
-        target.z = -40;
+        target.z = 55;
         break;
   }
 

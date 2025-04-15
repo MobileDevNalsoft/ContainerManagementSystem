@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:warehouse_3d/bloc/authentication/authentication_bloc.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
@@ -22,7 +23,7 @@ main() async {
 
   runApp(MultiBlocProvider(
     providers: [
-      BlocProvider(create: (_) => ContainerInteractionBloc(networkCalls: getIt())),
+      BlocProvider(create: (_) => ContainerInteractionBloc(networkCalls: getIt(), cacheManager: DefaultCacheManager())),
       BlocProvider(create: (_) => AuthenticationBloc(navigator: getIt())),
       BlocProvider(create: (_) => AreaBloc(networkCalls: getIt())),
       BlocProvider(create: (_) => EmptyBloc(networkCalls: getIt())),

@@ -15,7 +15,7 @@ window.initScene = async function () {
 
   addLights(scene);
 
-  const base = getBoxGeometry(600, 50, 660, 0x999999);
+  const base = getBoxGeometry(600, 50, 720, 0x999999);
 
   base.name = "YARD";
 

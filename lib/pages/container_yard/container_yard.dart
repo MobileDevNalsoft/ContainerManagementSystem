@@ -32,7 +32,7 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
     // TODO: implement initState
     super.initState();
     _containerInteractionBloc = context.read<ContainerInteractionBloc>();
-    _containerInteractionBloc.add(GetLotsData());
+
     _containerInteractionBloc.add(Intercepting(intercepting: false));
     animationController = AnimationController(duration: const Duration(milliseconds: 500), reverseDuration: const Duration(milliseconds: 100), vsync: this);
     widthAnimation =
@@ -47,7 +47,6 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
       if (!state.dataFromJS!.keys.contains('object') && state.dataFromJS!.keys.first != 'percentComplete') {
         animationController.forward(); // Start animation when data sheet is visible
       } else {
-        _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.Area));
         animationController.reverse(); // Reverse when not visible
       }
     });
@@ -110,33 +109,39 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                           },
                           buildWhen: (previous, current) => previous.sentDataToJS != current.sentDataToJS,
                           builder: (context, state) {
-                            return state.sentDataToJS!
-                                ? AnimatedBuilder(
-                                    animation: widthAnimation,
-                                    builder: (context, child) {
-                                      return SizedBox(
-                                        height: size.height * 0.92,
-                                        width: size.width * widthAnimation.value,
-                                        child: InAppWebView(
-                                          initialFile: 'assets/web_pro/index.html',
-                                          onWebViewCreated: (controller) async {
-                                            _containerInteractionBloc.state.webViewController = controller;
+                            return AnimatedBuilder(
+                                animation: widthAnimation,
+                                builder: (context, child) {
+                                  return SizedBox(
+                                    height: size.height * 0.92,
+                                    width: size.width * widthAnimation.value,
+                                    child: InAppWebView(
+                                      initialFile: 'assets/web_pro/index.html',
+                                      onWebViewCreated: (controller) async {
+                                        _containerInteractionBloc.state.webViewController = controller;
+                                      },
+                                      onConsoleMessage: (controller, consoleMessage) {
+                                        if (consoleMessage.messageLevel.toNativeValue() == 1 && consoleMessage.message.contains('{"')) {
+                                          Map<String, dynamic> message = jsonDecode(consoleMessage.message);
+                                          jsToFlutter(message);
+                                        }
+                                      },
+                                      onLoadStop: (controller, url) async {
+                                        _containerInteractionBloc.add(WebLoaded(loaded: true));
+                                        _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'storeLotsDataFromLocal();');
+                                        await controller.webStorage.localStorage.getItem(key: 'area_lots_data').then(
+                                          (value) {
+                                            _containerInteractionBloc.state.lotsData = value;
+                                            print(_containerInteractionBloc.state.lotsData);
                                           },
-                                          onConsoleMessage: (controller, consoleMessage) {
-                                            if (consoleMessage.messageLevel.toNativeValue() == 1 && consoleMessage.message.contains('{"')) {
-                                              Map<String, dynamic> message = jsonDecode(consoleMessage.message);
-                                              jsToFlutter(message);
-                                            }
-                                          },
-                                          onLoadStop: (controller, url) {
-                                            _containerInteractionBloc.add(WebLoaded(loaded: true));
-                                          },
-                                        ),
-                                      );
-                                    })
-                                : const Center(
-                                    child: CircularProgressIndicator(),
+                                        );
+                                      },
+                                    ),
                                   );
+                                });
+                            // : const Center(
+                            //     child: CircularProgressIndicator(),
+                            //   );
                           },
                         ),
                       ),
@@ -235,6 +240,10 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
       case 'object':
       case 'area':
         _containerInteractionBloc.add(DataFromJS(dataFromJS: data));
+        break;
+      case 'getLotsData':
+        _containerInteractionBloc.add(GetLotsData());
+        break;
       default:
         null;
     }
@@ -250,6 +259,7 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
       case 'dry':
       case 'damaged':
       case 'empty':
+      case 'unassigned':
         return AreaDataSheet(area: objectValue.split('_')[0], key: ValueKey(objectValue.split('_')[0]));
       default:
         return null;

@@ -4,6 +4,14 @@ window.storeLotsData = function (data) {
   globalThis.lotsData = JSON.parse(data);
 };
 
+window.storeLotsDataFromLocal = function () {
+  if(window.localStorage.getItem('area_lots_data') !== null){
+    globalThis.lotsData = JSON.parse(window.localStorage.getItem('area_lots_data'));
+  }else{
+    console.log('{"getLotsData":"null"}');
+  }
+}
+
 window.setCustomer = function (name) {
   globalThis.customerName = name;
 };
@@ -93,9 +101,10 @@ window.addContainer = async function (containerNbr, areaName) {
   globalThis.targetObject = null;
 };
 
-window.deleteContainer = function () {
+window.deleteContainer = function (containerNbr) {
   const scene = globalThis.scene;
-  const targetObject = globalThis.targetObject;
+  const targetObject = scene.getObjectByName('CON_'+containerNbr);
+  let topCon = 1;
 
   if (!targetObject) {
     console.warn("No target object selected.");
@@ -106,9 +115,9 @@ window.deleteContainer = function () {
     if (object.isMesh) {
       // Ensure it's a 3D object, not a Group or Light
       if (
-        object.name.includes("Container") &&
-        object.parent.position.x == targetObject.parent.position.x &&
-        object.parent.position.z == targetObject.parent.position.z
+        object.name.includes("CON") &&
+        object.parent.position.x == targetObject.position.x &&
+        object.parent.position.z == targetObject.position.z
       ) {
         console.log("obj name " + object.name);
         console.log(
@@ -121,37 +130,13 @@ window.deleteContainer = function () {
         );
         if (object.parent.position.y > 8) {
           object.parent.position.set(
-            targetObject.parent.position.x,
-            targetObject.parent.position.y,
-            targetObject.parent.position.z
+            object.parent.position.x,
+            object.parent.position.y - topCon * containerSize.y,
+            object.parent.position.z
           );
 
-          const customColor = new THREE.Color(0xff0000); // Red color
-
-          // Iterate through all the meshes in the container and apply the color to their materials
-          object.traverse((child) => {
-            if (child.isMesh) {
-              // For each mesh, check if it has a material and apply the color
-              if (child.material) {
-                // Clone the material so that each container has its own unique material
-                if (Array.isArray(child.material)) {
-                  // Handle cases where multiple materials exist for a mesh (array of materials)
-                  child.material.forEach((material) => {
-                    material = material.clone(); // Clone the material
-                    material.color.set(customColor); // Set the custom color
-                    child.material = material; // Apply the cloned material back to the mesh
-                  });
-                } else {
-                  // Single material for the mesh
-                  child.material = child.material.clone(); // Clone the material
-                  child.material.color.set(customColor); // Set the custom color
-                }
-              }
-            }
-          });
-
           const currentTitle = scene.getObjectByName(
-            globalThis.objData.get(object.parent.uuid).containerNbr
+            object.name.split('_')[1]
           );
 
           const currentTitleBoundingBox = new THREE.Box3().setFromObject(
@@ -161,9 +146,9 @@ window.deleteContainer = function () {
           currentTitleBoundingBox.getSize(currentTitleSize);
 
           currentTitle.position.set(
-            targetObject.parent.position.x + containerSize.x / 2,
-            targetObject.parent.position.y + containerSize.y / 2,
-            targetObject.parent.position.z + currentTitleSize.z / 2
+            currentTitle.position.x,
+            currentTitle.position.y - topCon * containerSize.y,
+            currentTitle.position.z
           );
         }
       }
@@ -186,7 +171,7 @@ window.deleteContainer = function () {
 
     // Remove title object (text mesh) from scene
     const titleObject = scene.getObjectByName(
-      globalThis.objData.get(targetObject.parent.uuid)?.containerNbr
+      targetObject.name.split('_')[1]
     );
 
     if (titleObject) {
@@ -393,4 +378,13 @@ function highlightLotAndContainer(
     title.visible = true;
     lot.material.color.set(originalColor);
   }, duration);
+}
+
+window.goToContainer = function (containerNbr, lotNo){
+  const scene = globalThis.scene;
+  const container = scene.getObjectByName('CON_'+containerNbr);
+  const title = scene.getObjectByName(containerNbr);
+  const lot = scene.getObjectByName(lotNo);
+
+  highlightLotAndContainer(container, title, lot);
 }

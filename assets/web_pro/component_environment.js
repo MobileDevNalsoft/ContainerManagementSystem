@@ -5,7 +5,7 @@ window.loadEnvironment = async function (topLeftCorner) {
   const gltf = await loadModel("../glbs/office1.glb");
   const model = gltf.scene;
   scene.add(model);
-  await addSkyDome();
+  // await addSkyDome();
   createLand();
   // await loadSurroundings();
   // await loadHysterStacker();
@@ -60,7 +60,7 @@ async function loadSurroundings(){
 async function loadHysterStacker(){
   const gltf = await loadModel("../glbs/hyster_stacker.glb");
   const model = gltf.scene;
-  model.position.set(150, 0, 200);
+  model.position.set(-150, 0, 305);
   model.rotateY(Math.PI/4);
   scene.add(model);
 }
@@ -165,7 +165,7 @@ async function addFencing() {
   fenceBoundingBox.getSize(fenceSize);
 
   // back
-  let initialPoint = new THREE.Vector3(-280, 0, -325);
+  let initialPoint = new THREE.Vector3(-280, 0, -355);
   for (let i = 0; i < 19; i++) {
     const fenceClone = fence.clone();
     fenceClone.position.copy(initialPoint);
@@ -174,9 +174,9 @@ async function addFencing() {
   }
 
   // right
-  initialPoint = new THREE.Vector3(292, 0, -310);
+  initialPoint = new THREE.Vector3(292, 0, -340);
 
-  for (let i = 0; i < 21; i++) {
+  for (let i = 0; i < 23; i++) {
     
       const fenceClone = fence.clone();
       fenceClone.rotation.y = Math.PI / 2;
@@ -186,7 +186,7 @@ async function addFencing() {
   }
 
   // front
-  initialPoint = new THREE.Vector3(-280, 0, 325);
+  initialPoint = new THREE.Vector3(-280, 0, 355);
   for (let i = 0; i < 19; i++) {
     if (i != 11 && i != 12 && i != 13) {
       const fenceClone = fence.clone();
@@ -197,9 +197,9 @@ async function addFencing() {
   }
 
   // left
-  initialPoint = new THREE.Vector3(-297, 0, -310);
+  initialPoint = new THREE.Vector3(-297, 0, -340);
 
-  for (let i = 0; i < 21; i++) {
+  for (let i = 0; i < 23; i++) {
     const fenceClone = fence.clone();
     fenceClone.rotation.y = Math.PI / 2;
     fenceClone.position.copy(initialPoint);

@@ -16,7 +16,7 @@ class ContainerData {
   String? arrivalTime;
 
   ContainerData.fromJson(Map<String, dynamic> json) {
-    containerNbr = json['container_nbr'];
+    containerNbr = json['shipment'];
     lotNo = json['lot_no'];
     arrivalTime = json['arrival_time'];
   }

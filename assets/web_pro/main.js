@@ -1,6 +1,6 @@
-import * as THREE from "three";
 
 document.addEventListener("DOMContentLoaded", async function () {
+
   createRenderer();
 
   createCamera();

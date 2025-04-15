@@ -579,7 +579,7 @@ class Customs {
               child: Material(
                 color: Colors.transparent,
                 child: SizedBox(
-                  height: size.height * 0.2,
+                  height: size.height * 0.25,
                   width: size.width * 0.2,
                   child: Stack(
                     alignment: Alignment.center,
@@ -592,48 +592,20 @@ class Customs {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Expanded(
-                              child: Row(
-                                children: [
-                                  const Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            "Container Nbr",
-                                            style: TextStyle(fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            containerNbr,
-                                            style: const TextStyle(fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                "Are you sure you want to delete the container with Container Nbr $containerNbr ?",
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
                             Gap(size.height * 0.01),
                             TextButton(
                                 onPressed: () {
-                                  containerInteractionBloc.add(DeleteContainer(area: area, containerNbr: containerNbr));
-                                  state.webViewController!.evaluateJavascript(source: 'deleteContainer();');
+                                  // containerInteractionBloc.add(DeleteContainer(area: area, containerNbr: containerNbr));
+                                  state.webViewController!.evaluateJavascript(source: 'deleteContainer("$containerNbr");');
                                   Navigator.pop(context);
                                 },
-                                child: PointerInterceptor(child: const Text("delete"))),
+                                style: TextButton.styleFrom(backgroundColor: const Color.fromRGBO(121, 65, 177, 1), foregroundColor: Colors.white),
+                                child: PointerInterceptor(child: const Text("yes"))),
                           ],
                         ),
                       ),

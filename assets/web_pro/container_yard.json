@@ -23,6 +23,11 @@
       "name": "EMPTY",
       "lotsPerRow": 11,
       "levels": 3
+    },
+    "unassignedArea": {
+      "name": "UNASSIGNED",
+      "lotsPerRow": 12,
+      "levels": 3
     }
   }
 }

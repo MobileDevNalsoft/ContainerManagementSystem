@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -10,15 +11,20 @@ import 'package:warehouse_3d/contants/app_constants.dart';
 import 'package:warehouse_3d/logger/logger.dart';
 import 'package:warehouse_3d/models/area_model.dart';
 import 'package:warehouse_3d/models/areas_model.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 part 'container_interaction_event.dart';
 part 'container_interaction_state.dart';
 
+const _kCacheKey = 'area_lots_data';
+
 class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, ContainerInteractionState> {
   final NetworkCalls _networkCalls;
+  final CacheManager _cacheManager;
 
-  ContainerInteractionBloc({required NetworkCalls networkCalls})
+  ContainerInteractionBloc({required NetworkCalls networkCalls, required CacheManager cacheManager})
       : _networkCalls = networkCalls,
+        _cacheManager = cacheManager,
         super(ContainerInteractionState.initial()) {
     on<GetLotsData>(_onGetLotsData);
     on<WebLoaded>(_onWebLoaded);
@@ -28,24 +34,32 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
     on<DeleteContainer>(_onDeleteContainer);
     on<ModelLoaded>(_onModelLoaded);
     on<DataFromJS>(_onDataFromJS);
-    on<SearchContainer>(_onSearchContainer);
     on<SelectedArea>(_onSelectedArea);
+    on<DropdownAreaChanged>(_onDropdownAreaChanged);
+  }
+
+  Future<void> _cacheLotsData(Map<String, dynamic> data) async {
+    try {
+      final jsonData = jsonEncode(data);
+      await state.webViewController!.webStorage.localStorage.setItem(key: _kCacheKey, value: jsonData);
+      Log.d('Lots data cached successfully at local storage');
+    } catch (e) {
+      Log.e('Error caching lots data: $e');
+    }
   }
 
   Future<void> _onGetLotsData(GetLotsData event, Emitter<ContainerInteractionState> emit) async {
     emit(state.copyWith(getLotsDataStatus: LotsDataStatus.loading));
-
     try {
-      await _networkCalls.get(AppConstants.GET_AREA_LOTS).then(
-        (apiResponse) {
-          Log.d(jsonDecode(apiResponse.response!.data)['data']);
-          emit(state.copyWith(
-              lotsData: jsonDecode(apiResponse.response!.data)['data'],
-              areas: Areas.fromJson(jsonDecode(apiResponse.response!.data)['data']),
-              getLotsDataStatus: LotsDataStatus.success,
-              sentDataToJS: true));
-        },
-      );
+      final apiResponse = await _networkCalls.get(AppConstants.GET_LOTS_DATA);
+      final responseData = jsonDecode(apiResponse.response!.data)['data'];
+      Log.d(responseData);
+      emit(state.copyWith(
+        lotsData: responseData,
+        getLotsDataStatus: LotsDataStatus.success,
+        sentDataToJS: true,
+      ));
+      _cacheLotsData(responseData);
     } catch (e) {
       Log.e(e.toString());
       emit(state.copyWith(getLotsDataStatus: LotsDataStatus.failure));
@@ -117,25 +131,6 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
     }
   }
 
-  Future<void> _onSearchContainer(SearchContainer event, Emitter<ContainerInteractionState> emit) async {
-    emit(state.copyWith(getSearchStatus: SearchStatus.loading));
-    await _networkCalls.get(AppConstants.SEARCH_CONTAINER, queryParameters: {"container_nbr": event.containerNbr}).then((apiResponse) {
-      Map<String, dynamic> response = jsonDecode(apiResponse.response!.data!);
-      SearchedContainer container = SearchedContainer.fromJson(response['data']);
-      if (response['response_code'] == 200) {
-        add(DataFromJS(dataFromJS: {"area": container.area!.toUpperCase()}));
-        state.webViewController!.evaluateJavascript(source: 'switchCamera("${container.area!.toUpperCase()}_AREA")');
-        emit(state.copyWith(getSearchStatus: SearchStatus.success, searchedContainer: container));
-      } else {
-        Error();
-      }
-    }).onError(
-      (error, stackTrace) {
-        emit(state.copyWith(getSearchStatus: SearchStatus.failure));
-      },
-    );
-  }
-
   void _onWebLoaded(WebLoaded event, Emitter<ContainerInteractionState> emit) {
     emit(state.copyWith(webLoaded: event.loaded));
   }
@@ -145,6 +140,9 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
   }
 
   void _onDataFromJS(DataFromJS event, Emitter<ContainerInteractionState> emit) {
+    if (event.dataFromJS.values.first == 'null') {
+      add(SelectedArea(selectedArea: AreaName.Area));
+    }
     emit(state.copyWith(dataFromJS: event.dataFromJS));
   }
 
@@ -156,5 +154,9 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
     emit(state.copyWith(
       selectedAreaName: event.selectedArea,
     ));
+  }
+
+  void _onDropdownAreaChanged(DropdownAreaChanged event, Emitter<ContainerInteractionState> emit) {
+    emit(state.copyWith(selectedDropdownArea: event.area));
   }
 }

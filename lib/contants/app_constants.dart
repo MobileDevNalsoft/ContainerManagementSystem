@@ -31,15 +31,15 @@ class AppConstants {
   static const String WMSUSERNAME = "nalsoft_adm";
   static const String WMSPASSWORD = 'P@s\$w0rd2024';
   // urls
-  static const APEX_URL = 'https://paas.nalsoft.net:4443/ords/xxma/cms/';
+  static const APEX_URL = 'https://paas.nalsoft.net:4443/ords/xxwms/cms/';
 
-  static const GET_AREA_LOTS = 'get_area_lots';
+  static const GET_LOTS_DATA = 'getLotsData';
   static const ADD_CONTAINER = 'add_container';
   static const RELOCATE_CONTAINER = 'relocate_container';
   static const DELETE_CONTAINER = 'delete_container';
 
   static const WORK_QUEUE = 'get_work_queue';
 
-  static const GET_AREA_DATA = 'get_area_data';
+  static const GET_AREA_DATA = 'getAreaData';
   static const SEARCH_CONTAINER = 'search_container';
 }

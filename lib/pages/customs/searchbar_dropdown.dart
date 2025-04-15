@@ -16,7 +16,7 @@ class SearchBarDropdown extends StatefulWidget {
 class _SearchBarDropdownState extends State<SearchBarDropdown> {
   bool isDropdownOpen = false;
 
-  final List<String> dropdownItems = ['Refrigerated', 'Empty', 'Dry', 'Damaged'];
+  final List<String> dropdownItems = ['Refrigerated', 'Empty', 'Dry', 'Damaged', 'Unassigned'];
 
   String? placeholderText;
   String? dropdownValue;
@@ -24,6 +24,7 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
   TextEditingController searchFieldController = TextEditingController();
   late final AreaBloc _areaBloc;
   late final ContainerInteractionBloc _containerInteractionBloc;
+  bool searchTextIsEmpty = true;
 
   double? height;
   double? bottomHeight;
@@ -93,7 +94,6 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
                           onTap: () {
                             setState(() {
                               placeholderText = 'What are you looking for?';
-                              _containerInteractionBloc.state.searchedContainer = null;
                               _containerInteractionBloc.state.searchTextController!.clear();
                               _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.sublist(1)[index]));
                               _containerInteractionBloc.state.webViewController!
@@ -141,7 +141,6 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
               ),
               child: Row(
                 children: [
-                  // if (!getIt<SharedPreferences>().getStringList('access_types')!.contains('Storage Area'))
                   InkWell(
                     onTap: () {},
                     onHover: (value) {
@@ -170,13 +169,22 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
                             );
                           }),
                           Gap(size.width * 0.005),
-                          AnimatedRotation(
-                            turns: turns,
-                            duration: const Duration(milliseconds: 200),
-                            child: Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: size.height * 0.025,
-                              color: Colors.white,
+                          BlocListener<AreaBloc, AreaState>(
+                            listener: (context, state) {
+                              if (state.getSearchContainerStatus == SearchContainerStatus.success && searchFieldController.text.isNotEmpty) {
+                                String area = state.customers!.first.containers!.first.lotNo!.split('_')[0];
+                                _containerInteractionBloc.add(DataFromJS(dataFromJS: {"area": area}));
+                                _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'switchCamera("${area}_AREA")');
+                              }
+                            },
+                            child: AnimatedRotation(
+                              turns: turns,
+                              duration: const Duration(milliseconds: 200),
+                              child: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: size.height * 0.025,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],
@@ -225,6 +233,22 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
                               ),
                             ),
                           ),
+                          if (searchFieldController.text.isNotEmpty)
+                            Transform.translate(
+                              offset: Offset(size.width * 0.006, 0),
+                              child: IconButton(
+                                onPressed: () {
+                                  searchFieldController.clear();
+                                  _areaBloc.add(GetAreaData(area: _areaBloc.state.customers!.first.containers!.first.lotNo!.split('_')[0]));
+                                },
+                                style: IconButton.styleFrom(overlayColor: Colors.transparent),
+                                icon: Icon(
+                                  Icons.clear_rounded,
+                                  size: size.height * 0.03,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
                           Container(
                             height: size.height * 0.046,
                             decoration: const BoxDecoration(color: Color.fromRGBO(121, 65, 177, 1), shape: BoxShape.circle),
@@ -232,7 +256,7 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
                               offset: Offset(0, -size.height * 0.0055),
                               child: IconButton(
                                   hoverColor: Colors.transparent,
-                                  onPressed: () {
+                                  onPressed: () async {
                                     search(size);
                                   },
                                   splashColor: Colors.transparent,
@@ -258,13 +282,14 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
   }
 
   void search(size) {
-    String? message = containerNbrValidator(searchFieldController.text);
-    if (message != null) {
-      Customs.CMSFlushbar(size, context, message: message);
-    } else {
-      _containerInteractionBloc.add(SearchContainer(containerNbr: searchFieldController.text));
-      // hit api with container number and if found get area and customer name
-      // call areadata sheet with area name it will hit the api and get the data
-    }
+    // String? message = containerNbrValidator(searchFieldController.text);
+    // if (message != null) {
+    //   Customs.CMSFlushbar(size, context, message: message);
+    // } else {
+    _areaBloc.state.getSearchContainerStatus = SearchContainerStatus.initial;
+    _areaBloc.add(SearchContainer(containerNbr: searchFieldController.text));
+    // hit api with container number and if found get area and customer name
+    // call areadata sheet with area name it will hit the api and get the data
+    // }
   }
 }

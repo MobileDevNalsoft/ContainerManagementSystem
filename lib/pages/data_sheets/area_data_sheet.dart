@@ -1,10 +1,14 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 import 'package:warehouse_3d/bloc/area/area_bloc.dart';
 import 'package:warehouse_3d/models/area_model.dart';
+import 'package:warehouse_3d/pages/customs/area_dropdown.dart';
+import 'package:warehouse_3d/pages/customs/custom_expansion_tile.dart';
 import 'package:warehouse_3d/pages/customs/customs.dart';
+import 'package:warehouse_3d/pages/customs/lot_dropdown.dart';
 
 class AreaDataSheet extends StatefulWidget {
   AreaDataSheet({required this.area, Key? key}) : super(key: key);
@@ -27,33 +31,15 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
     _containerInteractionBloc = context.read<ContainerInteractionBloc>();
     _areaBloc = context.read<AreaBloc>();
     _areaBloc.state.getAreaStatus = AreaStatus.initial;
-    _areaBloc.add(GetAreaData(area: widget.area));
+    if (_areaBloc.state.getSearchContainerStatus == SearchContainerStatus.initial) {
+      _areaBloc.add(GetAreaData(area: widget.area));
+    }
     _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.firstWhere((e) => e.name == initcapcase(widget.area))));
     _areaBloc.state.selectedCustomerIndex = 0;
+    _containerInteractionBloc.state.selectedDropdownArea = 'Refrigerated';
     // you will get the searched container area data
     // find the customer index from customers in area data then animate page with selected customer then container index using the customer data
     // then animate scroll to that container index.
-  }
-
-  Future<void> navigateToItem(String value, Size size) async {
-    String customer = _containerInteractionBloc.state.searchedContainer!.customerName!;
-    int custIndex = _areaBloc.state.customers!.indexWhere((element) => element.customerName == customer);
-    _areaBloc.state.selectedCustomerIndex = 2;
-    if (pageController.hasClients) {
-      await pageController.animateToPage(1, duration: Duration(milliseconds: 500), curve: Curves.linear);
-    }
-    int containerIndex = _areaBloc.state.customers![custIndex].containers!.indexWhere((element) => element.containerNbr == value);
-    if (containerIndex != -1 && _scrollController.hasClients) {
-      double scrollOffset = containerIndex * size.height * 0.13; // Assuming each item has a height of 50.0
-      _scrollController.animateTo(
-        scrollOffset,
-        duration: Duration(seconds: 1),
-        curve: Curves.linear,
-      );
-      _containerInteractionBloc.state.getSearchStatus = SearchStatus.initial;
-    } else {
-      print('Item not found');
-    }
   }
 
   @override
@@ -64,25 +50,20 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
         size: size,
         title: '${widget.area} AREA',
         onExit: () {
-          if (pageController.page == 1) {
-            pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.linear);
+          if (pageController.hasClients && pageController.page == 1) {
+            pageController.animateToPage(0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
           } else {
             _containerInteractionBloc.add(DataFromJS(dataFromJS: const {"object": "null"}));
+            _areaBloc.state.getAreaStatus = AreaStatus.initial;
             _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'switchCamera("YARD")');
             _containerInteractionBloc.state.searchTextController!.clear();
-            _containerInteractionBloc.state.searchedContainer = null;
             _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.Area));
           }
         },
         children: [
-          BlocConsumer<AreaBloc, AreaState>(
-            listener: (context, state) {
-              if (_containerInteractionBloc.state.getSearchStatus == SearchStatus.success && state.getAreaStatus == AreaStatus.success) {
-                navigateToItem(_containerInteractionBloc.state.searchedContainer!.containerNbr!, size);
-              }
-            },
+          BlocBuilder<AreaBloc, AreaState>(
             builder: (context, state) {
-              bool isEnabled = state.getAreaStatus != AreaStatus.success;
+              bool isEnabled = state.getAreaStatus == AreaStatus.loading || state.getSearchContainerStatus == SearchContainerStatus.loading;
               return Expanded(
                 child: isEnabled
                     ? const Center(child: CircularProgressIndicator())
@@ -110,7 +91,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           child: InkWell(
                                             onTap: () {
                                               _areaBloc.add(SelectedCustomer(index: index));
-                                              pageController.animateToPage(1, duration: Duration(milliseconds: 500), curve: Curves.linear);
+                                              pageController.animateToPage(1, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                                             },
                                             onHover: (value) {
                                               _areaBloc.add(AreaTileHovered(index: value ? index : null));
@@ -120,8 +101,10 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                               width: double.infinity,
                                               padding: EdgeInsets.only(right: lsize.maxWidth * 0.025),
                                               decoration: BoxDecoration(
-                                                color: state.areaTileHoveredIndex == index ? Color.fromRGBO(107, 54, 160, 1) : Color.fromRGBO(142, 84, 199, 1),
-                                                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 3, spreadRadius: 0.5)],
+                                                color: state.areaTileHoveredIndex == index
+                                                    ? const Color.fromRGBO(107, 54, 160, 1)
+                                                    : const Color.fromRGBO(142, 84, 199, 1),
+                                                boxShadow: [const BoxShadow(color: Colors.black, blurRadius: 3, spreadRadius: 0.5)],
                                                 borderRadius: BorderRadius.circular(15),
                                               ),
                                               alignment: Alignment.centerRight,
@@ -143,9 +126,9 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                               right: lsize.maxWidth * 0.12,
                                               top: index == 0 ? size.height * 0.01 : 0),
                                           decoration: BoxDecoration(
-                                              color: Color.fromRGBO(121, 65, 177, 1),
+                                              color: const Color.fromRGBO(121, 65, 177, 1),
                                               borderRadius: BorderRadius.circular(15),
-                                              border: Border.all(color: Color.fromRGBO(142, 84, 199, 1), width: 2)),
+                                              border: Border.all(color: const Color.fromRGBO(142, 84, 199, 1), width: 2)),
                                           child: LayoutBuilder(builder: (context, lsize) {
                                             return Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +153,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                                   child: Text(
                                                     '${state.customers![index].containers!.length.toString()} containers',
                                                     textAlign: TextAlign.center,
-                                                    style: TextStyle(color: const Color.fromARGB(255, 193, 193, 193), fontSize: 14),
+                                                    style: const TextStyle(color: Color.fromARGB(255, 193, 193, 193), fontSize: 14),
                                                   ),
                                                 ),
                                               ],
@@ -193,16 +176,16 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                       padding: EdgeInsets.symmetric(horizontal: lsize.maxWidth * 0.03),
                                       margin: EdgeInsets.only(bottom: lsize.maxHeight * 0.03),
                                       decoration: BoxDecoration(
-                                        color: Color.fromRGBO(164, 111, 218, 1),
+                                        color: const Color.fromRGBO(164, 111, 218, 1),
                                         borderRadius: BorderRadius.circular(15),
-                                        border: Border.all(width: 3, color: Color.fromRGBO(111, 54, 167, 1)),
+                                        border: Border.all(width: 3, color: const Color.fromRGBO(111, 54, 167, 1)),
                                       ),
                                       child: Row(
                                         children: [
                                           Image.asset(
                                             'assets/images/businessman.png',
                                             scale: lsize.maxHeight * 0.004,
-                                            color: Color.fromRGBO(111, 54, 167, 1),
+                                            color: const Color.fromRGBO(111, 54, 167, 1),
                                           ),
                                           Gap(lsize.maxWidth * 0.05),
                                           Expanded(
@@ -211,7 +194,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                               child: Text(
                                                 state.customers![state.selectedCustomerIndex!].customerName!,
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     color: Color.fromRGBO(111, 54, 167, 1), fontSize: 16, letterSpacing: 1.6, fontWeight: FontWeight.bold),
                                               ),
                                             ),
@@ -221,26 +204,26 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                     ),
                                   ),
                                   Expanded(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
-                                      child: ListView.builder(
-                                          controller: _scrollController,
+                                      child: CustomExpansionTile(
+                                          initialHeight: lsize.maxHeight * 0.14,
+                                          initialWidth: lsize.maxWidth,
+                                          dropdownHeight: lsize.maxHeight * 0.05,
+                                          margin: EdgeInsets.only(bottom: lsize.maxHeight * 0.018),
                                           itemCount: state.customers![state.selectedCustomerIndex!].containers!.length,
-                                          itemBuilder: (context, index) {
+                                          childBuilder: (height, width, index) {
                                             state.customers![state.selectedCustomerIndex!].containers!.sort(
                                               (a, b) =>
                                                   int.parse(RegExp(r'\d+').stringMatch(a.lotNo!)!).compareTo(int.parse(RegExp(r'\d+').stringMatch(b.lotNo!)!)),
                                             );
                                             ContainerData container = state.customers![state.selectedCustomerIndex!].containers![index];
                                             return Container(
-                                              height: lsize.maxHeight * 0.14,
-                                              width: lsize.maxWidth * 0.985,
+                                              height: height,
+                                              width: width,
                                               padding: EdgeInsets.all(lsize.maxWidth * 0.02),
-                                              margin: EdgeInsets.only(bottom: size.height * 0.018),
                                               decoration: BoxDecoration(
-                                                  color: Color.fromRGBO(121, 65, 177, 1),
+                                                  color: const Color.fromRGBO(121, 65, 177, 1),
                                                   borderRadius: BorderRadius.circular(15),
-                                                  border: Border.all(width: 4, color: Color.fromRGBO(142, 84, 199, 1))),
+                                                  border: Border.all(width: 4, color: const Color.fromRGBO(142, 84, 199, 1))),
                                               child: LayoutBuilder(builder: (context, lsize) {
                                                 return Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,7 +239,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                                         Gap(lsize.maxWidth * 0.03),
                                                         Text(
                                                           container.containerNbr!,
-                                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                                                         ),
                                                         Gap(lsize.maxWidth * 0.03),
                                                       ],
@@ -267,101 +250,197 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                                         Gap(lsize.maxWidth * 0.16),
                                                         Text(
                                                           'lot ${RegExp(r'\d+').stringMatch(container.lotNo!).toString()}',
-                                                          style: TextStyle(
-                                                              color: const Color.fromARGB(255, 193, 193, 193), fontWeight: FontWeight.bold, fontSize: 14),
-                                                        ),
-                                                        Spacer(),
-                                                        Text(
-                                                          container.arrivalTime!.split(' ')[1].split('.')[0].substring(0, 5),
-                                                          style: TextStyle(color: Colors.white),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              }),
-                                            );
-                                            return Container(
-                                              height: lsize.maxHeight * 0.13,
-                                              width: double.infinity,
-                                              padding: const EdgeInsets.all(5),
-                                              margin: const EdgeInsets.only(bottom: 5),
-                                              decoration: BoxDecoration(
-                                                color: Color.fromRGBO(209, 230, 255, 1),
-                                                borderRadius: BorderRadius.circular(15),
-                                              ),
-                                              child: LayoutBuilder(builder: (context, lsize) {
-                                                return Column(
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Container(
-                                                          height: lsize.maxHeight * 0.5,
-                                                          decoration: BoxDecoration(
-                                                              color: const Color.fromRGBO(12, 46, 87, 1), borderRadius: BorderRadius.circular(15)),
-                                                          child: Row(
-                                                            children: [
-                                                              Gap(lsize.maxWidth * 0.03),
-                                                              Image.asset(
-                                                                'assets/images/container.png',
-                                                                scale: lsize.maxHeight * 0.022,
-                                                              ),
-                                                              Gap(lsize.maxWidth * 0.03),
-                                                              Text(
-                                                                container.containerNbr!,
-                                                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                                                              ),
-                                                              Gap(lsize.maxWidth * 0.03),
-                                                            ],
-                                                          ),
+                                                          style: const TextStyle(
+                                                              color: Color.fromARGB(255, 193, 193, 193), fontWeight: FontWeight.bold, fontSize: 14),
                                                         ),
                                                         const Spacer(),
-                                                        Container(
-                                                          height: lsize.maxHeight * 0.4,
-                                                          width: lsize.maxHeight * 0.4,
-                                                          alignment: Alignment.center,
-                                                          decoration: BoxDecoration(color: const Color.fromRGBO(12, 46, 87, 1), shape: BoxShape.circle),
-                                                          child: Text(
-                                                            'L${RegExp(r'\d+').stringMatch(container.lotNo!).toString()}',
-                                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                                                          ),
+                                                        Text(
+                                                          container.arrivalTime!.split('T')[1].substring(0, 5),
+                                                          style: const TextStyle(color: Colors.white),
                                                         )
                                                       ],
                                                     ),
-                                                    Gap(lsize.maxHeight * 0.15),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Image.asset(
-                                                              'assets/images/date.png',
-                                                              scale: lsize.maxHeight * 0.027,
-                                                            ),
-                                                            Gap(lsize.maxHeight * 0.02),
-                                                            Text(container.arrivalTime!.split(' ')[0])
-                                                          ],
-                                                        ),
-                                                        SizedBox(
-                                                          width: lsize.maxWidth * 0.25,
-                                                          child: Row(
-                                                            children: [
-                                                              Image.asset(
-                                                                'assets/images/time.png',
-                                                                scale: lsize.maxHeight * 0.025,
-                                                              ),
-                                                              Gap(lsize.maxHeight * 0.02),
-                                                              Text(container.arrivalTime!.split(' ')[1].split('.')[0])
-                                                            ],
-                                                          ),
-                                                        )
-                                                      ],
-                                                    )
                                                   ],
                                                 );
                                               }),
                                             );
-                                          }),
+                                          },
+                                          dropDownBuilder: (index) {
+                                            ContainerData container = state.customers![state.selectedCustomerIndex!].containers![index];
+                                            return Row(
+                                              children: [
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      _containerInteractionBloc.state.webViewController!
+                                                          .evaluateJavascript(source: 'goToContainer("${container.containerNbr}","${container.lotNo}");');
+                                                    },
+                                                    child: Container(
+                                                      height: double.infinity,
+                                                      padding: EdgeInsets.only(top: lsize.maxHeight * 0.031, bottom: lsize.maxHeight * 0.007),
+                                                      decoration: const BoxDecoration(
+                                                          color: Color.fromARGB(255, 89, 201, 147),
+                                                          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15))),
+                                                      child: Image.asset('assets/images/locate.png', color: const Color.fromARGB(255, 10, 114, 64)),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      _areaBloc.add(SelectedContainer(index: index));
+                                                      if (widget.area == 'UNASSIGNED') {
+                                                        pageController.animateToPage(2, duration: const Duration(milliseconds: 500), curve: Curves.linear);
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      height: double.infinity,
+                                                      padding: EdgeInsets.only(top: lsize.maxHeight * 0.031, bottom: lsize.maxHeight * 0.007),
+                                                      decoration: const BoxDecoration(color: Color.fromARGB(255, 102, 102, 213)),
+                                                      child: Image.asset(
+                                                        'assets/images/${widget.area == 'UNASSIGNED' ? 'allocate' : 'relocate'}.png',
+                                                        color: const Color.fromARGB(255, 13, 13, 116),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      Customs.DeleteContainerDialog(
+                                                          context: context, containerNbr: container.containerNbr!, area: container.lotNo!.split('_')[0]);
+                                                    },
+                                                    child: Container(
+                                                      height: double.infinity,
+                                                      padding: EdgeInsets.only(top: lsize.maxHeight * 0.031, bottom: lsize.maxHeight * 0.007),
+                                                      decoration: const BoxDecoration(
+                                                          color: Color.fromARGB(255, 216, 97, 97),
+                                                          borderRadius: BorderRadius.only(bottomRight: Radius.circular(15))),
+                                                      child: Image.asset(
+                                                        'assets/images/delete.png',
+                                                        color: const Color.fromARGB(255, 118, 14, 14),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            );
+                                          })),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Column(
+                                children: [
+                                  IntrinsicWidth(
+                                    child: Container(
+                                      height: size.height * 0.05,
+                                      padding: EdgeInsets.symmetric(horizontal: lsize.maxWidth * 0.03),
+                                      margin: EdgeInsets.only(bottom: lsize.maxHeight * 0.03),
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromRGBO(164, 111, 218, 1),
+                                        borderRadius: BorderRadius.circular(15),
+                                        border: Border.all(width: 3, color: const Color.fromRGBO(111, 54, 167, 1)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/businessman.png',
+                                            scale: lsize.maxHeight * 0.004,
+                                            color: const Color.fromRGBO(111, 54, 167, 1),
+                                          ),
+                                          Gap(lsize.maxWidth * 0.05),
+                                          Expanded(
+                                            child: Transform.translate(
+                                              offset: Offset(-size.width * 0.0065, 0),
+                                              child: Text(
+                                                state.customers![state.selectedCustomerIndex!].customerName!,
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                    color: Color.fromRGBO(111, 54, 167, 1), fontSize: 16, letterSpacing: 1.6, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: lsize.maxHeight * 0.5,
+                                    width: lsize.maxWidth * 0.95,
+                                    padding: EdgeInsets.all(lsize.maxHeight * 0.02),
+                                    decoration: BoxDecoration(
+                                        color: const Color.fromARGB(255, 197, 164, 231),
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [BoxShadow(color: Colors.black, blurRadius: 3)]),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: IntrinsicWidth(
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Image.asset(
+                                                  'assets/images/container.png',
+                                                  scale: lsize.maxHeight * 0.0035,
+                                                  color: const Color.fromRGBO(111, 54, 167, 1),
+                                                ),
+                                                Gap(lsize.maxWidth * 0.03),
+                                                Expanded(
+                                                  child: Text(
+                                                    state.customers![state.selectedCustomerIndex!].containers![state.selectedContainerIndex!].containerNbr!,
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                        color: Color.fromRGBO(111, 54, 167, 1), fontSize: 18, letterSpacing: 1.6, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Gap(lsize.maxHeight * 0.05),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.02, bottom: lsize.maxHeight * 0.02),
+                                          child: Text(
+                                            'Area',
+                                            style: TextStyle(
+                                              color: Color.fromRGBO(111, 54, 167, 1),
+                                            ),
+                                          ),
+                                        ),
+                                        AreaDropDown(),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.03),
+                                          child: Text(
+                                            'Lot',
+                                            style: TextStyle(
+                                              color: Color.fromRGBO(111, 54, 167, 1),
+                                            ),
+                                          ),
+                                        ),
+                                        BlocBuilder<ContainerInteractionBloc, ContainerInteractionState>(builder: (context, state) {
+                                          print('selected Area ${state.selectedDropdownArea}');
+                                          return LotDropdown(
+                                            suggestionsCallback: (pattern) {
+                                              print('selected Area in ${state.selectedDropdownArea}');
+                                              return state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'].keys
+                                                  .where((e) =>
+                                                      e.contains(pattern) && state.lotsData![state.selectedDropdownArea!.toUpperCase()]['lots'][e].length < 3)
+                                                  .toList()
+                                                ..sort((a, b) {
+                                                  // Extract numbers from lot names
+                                                  int numA = int.tryParse(RegExp(r'\d+').firstMatch(a)?.group(0) ?? '0') ?? 0;
+                                                  int numB = int.tryParse(RegExp(r'\d+').firstMatch(b)?.group(0) ?? '0') ?? 0;
+                                                  return numA.compareTo(numB);
+                                                });
+                                            },
+                                          );
+                                        })
+                                      ],
                                     ),
                                   ),
                                 ],

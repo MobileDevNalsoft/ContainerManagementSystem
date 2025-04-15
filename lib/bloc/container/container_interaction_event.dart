@@ -71,15 +71,6 @@ class Intercepting extends ContainerInteractionEvent {
   List<Object> get props => [intercepting];
 }
 
-class SearchContainer extends ContainerInteractionEvent {
-  final String containerNbr;
-
-  SearchContainer({required this.containerNbr});
-
-  @override
-  List<Object> get props => [containerNbr];
-}
-
 class SelectedArea extends ContainerInteractionEvent {
   final AreaName selectedArea;
 
@@ -87,4 +78,13 @@ class SelectedArea extends ContainerInteractionEvent {
 
   @override
   List<Object> get props => [selectedArea];
+}
+
+class DropdownAreaChanged extends ContainerInteractionEvent {
+  final String area;
+
+  DropdownAreaChanged({required this.area});
+
+  @override
+  List<Object> get props => [area];
 }

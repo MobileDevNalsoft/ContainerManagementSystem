@@ -25,7 +25,7 @@ window.addInteractions = function () {
       const targetObject = intersects[0].object;
       globalThis.hoverObject = targetObject;
       const name = targetObject.name;
-      if (name.includes("Container")) {
+      if (name.includes("CON")) {
         const uuid = targetObject.parent?.uuid;
         if (uuid && globalThis.objData.has(uuid)) {
           const containerData = globalThis.objData.get(uuid);
@@ -34,23 +34,24 @@ window.addInteractions = function () {
             case "REFRIGERATED":
             case "EMPTY":
             case "DAMAGED":
-              const arrivalDate = containerData.arrivalTime.split(" ")[0];
-              const detentionDays = getDaysDiff(arrivalDate);
-              const detentionText =
-                detentionDays > 0 ? `Detention Days: ${detentionDays}<br>Detention Cost: ${detentionDays*500}Rs` : "";
+              // const arrivalDate = containerData.arrivalTime.split(" ")[0];
+              // const detentionDays = getDaysDiff(arrivalDate);
+              // const detentionText =
+              //   detentionDays > 0 ? `Detention Days: ${detentionDays}<br>Detention Cost: ${detentionDays*500}Rs` : "";
               tooltip.style.display = "block";
-              tooltip.innerHTML = `<strong>${containerData.containerNbr}</strong><div class="tooltip-content">
-                                            Customer Name: ${containerData.customerName}<br>
-                                            Arrival Date: ${arrivalDate}<br>
-                                            ${detentionText}
-                                            </div>`;
+              tooltip.innerHTML = `<strong>${containerData.containerNbr}</strong>`;
+                                            // <div class="tooltip-content">
+                                            // Customer Name: ${containerData.customerName}<br>
+                                            // Arrival Date: ${arrivalDate}<br>
+                                            // ${detentionText}
+                                            // </div>`;
               break;
           }
           setToolTipPosition(targetObject, tooltip, camera);
         }
       } else if (name.includes("AREA")) {
-        const areaLots = lotsData[`${name.toLowerCase()}`];
-        const totalLots = Object.keys(areaLots).length;
+        const areaLots = lotsData[`${name.split("_")[0]}`].lots;
+        const totalLots = lotsData[`${name.split("_")[0]}`].max_lots;
         const availableLots = Object.keys(areaLots).filter(
           (lot) => areaLots[lot].length < 3
         ).length;
@@ -152,13 +153,13 @@ window.addInteractions = function () {
         const uuid = targetObject.parent?.uuid;
         if (uuid && globalThis.objData.has(uuid)) {
           globalThis.currentContainerUUID = uuid;
-          console.log(
-            JSON.stringify({
-              containerNbr: globalThis.objData.get(uuid).containerNbr,
-              area: globalThis.objData.get(uuid).area,
-              lotNo: globalThis.objData.get(uuid).lotNo
-            })
-          );
+          // console.log(
+          //   JSON.stringify({
+          //     containerNbr: globalThis.objData.get(uuid).containerNbr,
+          //     area: globalThis.objData.get(uuid).area,
+          //     lotNo: globalThis.objData.get(uuid).lotNo
+          //   })
+          // );
         }
       } else if (name.includes("AREA")) {
         areaFocused = true;

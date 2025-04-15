@@ -4,9 +4,7 @@ enum LotsDataStatus { initial, loading, success, failure }
 
 enum AddContainerStatus { initial, loading, success, failure }
 
-enum SearchStatus { initial, loading, success, failure }
-
-enum AreaName { Area, Refrigerated, Dry, Damaged, Empty }
+enum AreaName { Area, Refrigerated, Dry, Damaged, Empty, Unassigned }
 
 final class ContainerInteractionState {
   ContainerInteractionState(
@@ -20,12 +18,11 @@ final class ContainerInteractionState {
       this.areas,
       this.intercepting,
       this.modelLoaded,
-      this.getSearchStatus,
       this.searchText,
       this.selectedAreaIndex,
+      this.selectedDropdownArea,
       this.selectedAreaName,
-      this.searchTextController,
-      this.searchedContainer});
+      this.searchTextController});
 
   InAppWebViewController? webViewController;
   LotsDataStatus? getLotsDataStatus;
@@ -37,11 +34,10 @@ final class ContainerInteractionState {
   Map<String, dynamic>? dataFromJS;
   Areas? areas;
   bool? intercepting;
-  SearchStatus? getSearchStatus;
-  SearchedContainer? searchedContainer;
   String? searchText;
   int? selectedAreaIndex;
   AreaName? selectedAreaName;
+  String? selectedDropdownArea;
   TextEditingController? searchTextController;
 
   factory ContainerInteractionState.initial() {
@@ -52,8 +48,8 @@ final class ContainerInteractionState {
         dataFromJS: {"object": "null"},
         sentDataToJS: false,
         intercepting: false,
-        getSearchStatus: SearchStatus.initial,
         selectedAreaName: AreaName.Area,
+        selectedDropdownArea: 'Refrigerated',
         modelLoaded: false);
   }
 
@@ -63,12 +59,11 @@ final class ContainerInteractionState {
       bool? webLoaded,
       AddContainerStatus? getAddContainerStatus,
       Map<String, dynamic>? dataFromJS,
+      String? selectedDropdownArea,
       bool? intercepting,
       Areas? areas,
       bool? sentDataToJS,
-      SearchStatus? getSearchStatus,
       AreaName? selectedAreaName,
-      SearchedContainer? searchedContainer,
       bool? modelLoaded}) {
     return ContainerInteractionState(
         webViewController: webViewController,
@@ -77,8 +72,6 @@ final class ContainerInteractionState {
         webLoaded: webLoaded ?? this.webLoaded,
         getAddContainerStatus: getAddContainerStatus ?? this.getAddContainerStatus,
         areas: areas ?? this.areas,
-        searchedContainer: searchedContainer ?? this.searchedContainer,
-        getSearchStatus: getSearchStatus ?? this.getSearchStatus,
         dataFromJS: dataFromJS ?? this.dataFromJS,
         intercepting: intercepting ?? this.intercepting,
         searchText: searchText,
@@ -86,6 +79,7 @@ final class ContainerInteractionState {
         selectedAreaIndex: selectedAreaIndex,
         sentDataToJS: sentDataToJS ?? this.sentDataToJS,
         selectedAreaName: selectedAreaName ?? this.selectedAreaName,
+        selectedDropdownArea: selectedDropdownArea ?? this.selectedDropdownArea,
         modelLoaded: modelLoaded ?? this.modelLoaded);
   }
 }

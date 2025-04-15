@@ -3,26 +3,32 @@ import * as THREE from "three";
 window.buildAreas = async function () {
   buildArea(
     json.areas.dryArea,
-    lotsData.dry_area,
-    new THREE.Vector3(-100, 0, -200),
+    lotsData.DRY,
+    new THREE.Vector3(-100, 0, -220),
     0x999999
   );
   buildArea(
     json.areas.damagedArea,
-    lotsData.damaged_area,
-    new THREE.Vector3(185, 0, -225),
+    lotsData.DAMAGED,
+    new THREE.Vector3(185, 0, -245),
     0x999999
   );
   buildArea(
     json.areas.refrigeratedArea,
-    lotsData.refrigerated_area,
-    new THREE.Vector3(-100, 0, 20),
+    lotsData.REFRIGERATED,
+    new THREE.Vector3(-100, 0, 0),
     0x999999
   );
   buildArea(
     json.areas.emptyArea,
-    lotsData.empty_area,
-    new THREE.Vector3(185, 0, -5),
+    lotsData.EMPTY,
+    new THREE.Vector3(185, 0, -25),
+    0x999999
+  );
+  buildArea(
+    json.areas.unassignedArea,
+    lotsData.UNASSIGNED,
+    new THREE.Vector3(100, 0, 190),
     0x999999
   );
 };
@@ -35,7 +41,7 @@ const columnGap = 20;
 const padding = 40;
 
 async function buildArea(areaJson, areaLotsData, position, color) {
-  const totalColumns = Object.keys(areaLotsData).length / areaJson.lotsPerRow;
+  const totalColumns = areaLotsData.max_lots / areaJson.lotsPerRow;
   const totalRows = areaJson.lotsPerRow;
   const width =
     json.lotSize.width * totalRows + rowGap * (totalRows - 1) + padding;
@@ -53,6 +59,8 @@ async function buildArea(areaJson, areaLotsData, position, color) {
   area.position.set(position.x, position.y, position.z);
 
   area.name = areaJson.name + "_AREA";
+
+  console.log('area name : ', area.name);
 
   const edges = new THREE.EdgesGeometry(area.geometry);
   const edgePositions = edges.attributes.position.array; // Vertex positions
@@ -123,6 +131,10 @@ async function buildArea(areaJson, areaLotsData, position, color) {
 
   const gltf = await loadModel("../glbs/white_container.glb");
   const container = gltf.scene;
+  // const containerGeometry = new THREE.BoxGeometry(8, 8, 20);
+  // containerGeometry.translate(0, 4, 0);
+  // const containerMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  // const container = new THREE.Mesh(containerGeometry, containerMaterial);
   globalThis.container = container;
 
   const containerBoundingBox = new THREE.Box3().setFromObject(container);
@@ -181,79 +193,86 @@ async function buildArea(areaJson, areaLotsData, position, color) {
 
       scene.add(lotGroup);
 
-      let lotNo = "lot" + (i + 1 + totalRows * j);
-      lot.name = areaJson.name + "_" + lotNo;
+      lot.name = areaJson.name + "_" + (i + 1 + totalRows * j);
       border.name = lot.name + "_border";
       lot.userData = {
         area: areaJson.name,
       };
       lots.push(lotGroup);
 
-      // for (let i = 0; i < areaLotsData[lotNo].length; i++) {
-        // const containerGroup = new THREE.Group();
-        // const containerClone = container.clone();
-        // containerClone.position.set(
-        //   lot.position.x,
-        //   lot.position.y + i * containerSize.y,
-        //   lot.position.z
-        // );
-        // const customColor = getColor();
+      for (let i = 0; i < areaLotsData.lots[lot.name]?.length; i++) {
+        const containerGroup = new THREE.Group();
+        const containerClone = container.clone();
+        const containerName = 'CON_'+ areaLotsData.lots[lot.name][i].shipment;
+        containerClone.name = containerName;
+        containerClone.traverse((child) => {
+          if (child.isObject3D) {
+            child.name = containerName; // Ensure all children have the same name
+          }
+        });
+        containerClone.position.set(
+          lot.position.x,
+          lot.position.y + (areaLotsData.lots[lot.name][i].lvl - 1) * containerSize.y,
+          lot.position.z
+        );
+        const customColor = getColor();
 
-        // // Iterate through all the meshes in the container and apply the color to their materials
-        // containerClone.traverse((child) => {
-        //   if (child.isMesh) {
-        //     // For each mesh, check if it has a material and apply the color
-        //     if (child.material) {
-        //       // Clone the material so that each container has its own unique material
-        //       if (Array.isArray(child.material)) {
-        //         // Handle cases where multiple materials exist for a mesh (array of materials)
-        //         child.material.forEach((material) => {
-        //           material = material.clone(); // Clone the material
-        //           material.color.set(customColor); // Set the custom color
-        //           child.material = material; // Apply the cloned material back to the mesh
-        //         });
-        //       } else {
-        //         // Single material for the mesh
-        //         child.material = child.material.clone(); // Clone the material
-        //         child.material.color.set(customColor); // Set the custom color
-        //       }
-        //     }
-        //   }
-        // });
-        // containerGroup.add(containerClone);
+        // Iterate through all the meshes in the container and apply the color to their materials
+        containerClone.traverse((child) => {
+          if (child.isMesh) {
+            // For each mesh, check if it has a material and apply the color
+            if (child.material) {
+              // Clone the material so that each container has its own unique material
+              if (Array.isArray(child.material)) {
+                // Handle cases where multiple materials exist for a mesh (array of materials)
+                child.material.forEach((material) => {
+                  material = material.clone(); // Clone the material
+                  material.color.set(customColor); // Set the custom color
+                  child.material = material; // Apply the cloned material back to the mesh
+                });
+              } else {
+                // Single material for the mesh
+                child.material = child.material.clone(); // Clone the material
+                child.material.color.set(customColor); // Set the custom color
+              }
+            }
+          }
+        });
+        containerGroup.add(containerClone);
 
-        // await ThreeDText(
-        //   areaLotsData[lotNo][i].container_nbr,
-        //   1,
-        //   0.1,
-        //   0xffffff
-        // ).then((title) => {
-        //   const titleBoundingBox = new THREE.Box3().setFromObject(title);
-        //   const titleSize = new THREE.Vector3();
-        //   titleBoundingBox.getSize(titleSize);
-        //   title.raycast = () => {};
-        //   title.rotation.y = Math.PI / 2;
-        //   title.position.set(
-        //     containerClone.position.x + containerSize.x / 2,
-        //     containerClone.position.y + containerSize.y / 2,
-        //     containerClone.position.z + titleSize.x / 2
-        //   );
-        //   title.name = areaLotsData[lotNo][i].container_nbr;
-        //   containerGroup.add(title);
-        // });
-        // scene.add(containerGroup);
-        // const uuid = containerClone.uuid;
-        // globalThis.objData.set(uuid, {
-        //   containerNbr: areaLotsData[lotNo][i].container_nbr,
-        //   arrivalTime: areaLotsData[lotNo][i]?.arrival_time,
-        //   customerName: areaLotsData[lotNo][i]?.customer_name,
-        //   area: areaJson.name,
-        //   lotNo: lotNo,
-        // });
-        // containers.push(containerClone);
-      // }
+        await ThreeDText(
+          areaLotsData.lots[lot.name][i].shipment,
+          1,
+          0.1,
+          0xffffff
+        ).then((title) => {
+          const titleBoundingBox = new THREE.Box3().setFromObject(title);
+          const titleSize = new THREE.Vector3();
+          titleBoundingBox.getSize(titleSize);
+          title.raycast = () => {};
+          title.rotation.y = Math.PI / 2;
+          title.position.set(
+            containerClone.position.x + containerSize.x / 2,
+            containerClone.position.y + containerSize.y / 2,
+            containerClone.position.z + titleSize.x / 2
+          );
+          title.name = areaLotsData.lots[lot.name][i].shipment;
+          containerGroup.add(title);
+        });
+        scene.add(containerGroup);
+        const uuid = containerClone.uuid;
+        globalThis.objData.set(uuid, {
+          containerNbr: areaLotsData.lots[lot.name][i].shipment,
+          // arrivalTime: areaLotsData[lotNo][i]?.arrival_time,
+          // customerName: areaLotsData[lotNo][i]?.customer_name,
+          area: areaJson.name,
+          lotNo: lot.name,
+        });
+        containers.push(containerClone);
+      }
     }
   }
+ 
   globalThis.containers = containers;
 }
 
@@ -261,24 +280,24 @@ window.getColor = function () {
   const colors = [0xff0000, 0x6cc24a, 0x6484f3, 0xbd7c3b];
 
   const randomIndex = Math.floor(Math.random() * colors.length);
-  
+
   return new THREE.Color(colors[randomIndex]);
 };
 
-
 window.getBorderColor = function (area) {
   switch (area) {
-    case 'DRY':
-      return new THREE.Color(0x00B7EB);
-    case 'REFRIGERATED':
+    case "DRY":
+      return new THREE.Color(0x00b7eb);
+    case "REFRIGERATED":
       return new THREE.Color(0xc2f530);
-    case 'DAMAGED':
+    case "DAMAGED":
       return new THREE.Color(0xd46942);
-    case 'EMPTY':
+    case "EMPTY":
+      return new THREE.Color(0xe5e5e5);
+    case "UNASSIGNED":
       return new THREE.Color(0xe5e5e5);
   }
 };
-
 
 function enableDragging() {
   dragControls = new DragControls(containers, camera, renderer.domElement);

@@ -29,7 +29,7 @@ window.addLights = function(scene){
   directionalLight3.lookAt(0,0,0);
   scene.add(directionalLight3);
 
-  const rectLight = new THREE.RectAreaLight(0xffffff, 1, 600, 660);
+  const rectLight = new THREE.RectAreaLight(0xffffff, 1, 600, 800);
   rectLight.position.set(0,50,0);
   rectLight.lookAt(0,0,0);
   scene.add(rectLight);
