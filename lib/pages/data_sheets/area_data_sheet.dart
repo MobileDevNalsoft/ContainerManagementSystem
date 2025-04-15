@@ -36,7 +36,8 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
     }
     _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.firstWhere((e) => e.name == initcapcase(widget.area))));
     _areaBloc.state.selectedCustomerIndex = 0;
-    _containerInteractionBloc.state.selectedDropdownArea = 'Refrigerated';
+    print("widget area" + widget.area);
+    _containerInteractionBloc.state.selectedDropdownArea = widget.area.toLowerCase() == 'unassigned' ? 'Refrigerated' : widget.area.toLowerCase();
     // you will get the searched container area data
     // find the customer index from customers in area data then animate page with selected customer then container index using the customer data
     // then animate scroll to that container index.
@@ -291,11 +292,10 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                                   child: InkWell(
                                                     onTap: () {
                                                       _areaBloc.add(SelectedContainer(index: index));
-                                                      if (widget.area == 'UNASSIGNED') {
-                                                        _containerInteractionBloc.state.selectedDropdownLot = null;
-                                                        _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'switchCamera("YARD")');
-                                                        pageController.animateToPage(2, duration: const Duration(milliseconds: 500), curve: Curves.linear);
-                                                      }
+                                                      _containerInteractionBloc.state.lotOfSelectedShipment = container.lotNo!;
+                                                      _containerInteractionBloc.state.selectedDropdownLot = null;
+                                                      _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'switchCamera("YARD")');
+                                                      pageController.animateToPage(2, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                                                     },
                                                     child: Container(
                                                       height: double.infinity,
@@ -416,7 +416,12 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                             ),
                                           ),
                                         ),
-                                        AreaDropDown(),
+                                        AreaDropDown(
+                                          selectdAreaDropdown:
+                                              context.read<ContainerInteractionBloc>().state.selectedDropdownArea.toString().toLowerCase() == 'unassigned'
+                                                  ? 'Refrigerated'
+                                                  : context.read<ContainerInteractionBloc>().state.selectedDropdownArea,
+                                        ),
                                         Padding(
                                           padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.03, bottom: lsize.maxHeight * 0.02),
                                           child: Text(

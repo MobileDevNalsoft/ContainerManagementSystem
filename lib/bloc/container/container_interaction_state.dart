@@ -23,7 +23,8 @@ final class ContainerInteractionState {
       this.selectedDropdownArea,
       this.selectedDropdownLot,
       this.selectedAreaName,
-      this.searchTextController});
+      this.searchTextController,
+      this.lotOfSelectedShipment});
 
   InAppWebViewController? webViewController;
   LotsDataStatus? getLotsDataStatus;
@@ -41,6 +42,7 @@ final class ContainerInteractionState {
   String? selectedDropdownArea;
   String? selectedDropdownLot;
   TextEditingController? searchTextController;
+  String? lotOfSelectedShipment;
 
   factory ContainerInteractionState.initial() {
     return ContainerInteractionState(
@@ -52,7 +54,8 @@ final class ContainerInteractionState {
         intercepting: false,
         selectedAreaName: AreaName.Area,
         selectedDropdownArea: 'Refrigerated',
-        modelLoaded: false);
+        modelLoaded: false,
+        lotOfSelectedShipment: '');
   }
 
   ContainerInteractionState copyWith(
@@ -67,7 +70,8 @@ final class ContainerInteractionState {
       Areas? areas,
       bool? sentDataToJS,
       AreaName? selectedAreaName,
-      bool? modelLoaded}) {
+      bool? modelLoaded,
+      String? lotOfSelectedShipment}) {
     return ContainerInteractionState(
         webViewController: webViewController,
         getLotsDataStatus: getLotsDataStatus ?? this.getLotsDataStatus,
@@ -84,6 +88,7 @@ final class ContainerInteractionState {
         selectedAreaName: selectedAreaName ?? this.selectedAreaName,
         selectedDropdownArea: selectedDropdownArea ?? this.selectedDropdownArea,
         selectedDropdownLot: selectedDropdownLot ?? this.selectedDropdownLot,
-        modelLoaded: modelLoaded ?? this.modelLoaded);
+        modelLoaded: modelLoaded ?? this.modelLoaded,
+        lotOfSelectedShipment: lotOfSelectedShipment ?? this.lotOfSelectedShipment);
   }
 }

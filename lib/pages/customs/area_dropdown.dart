@@ -5,15 +5,15 @@ import 'package:gap/gap.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 
 class AreaDropDown extends StatefulWidget {
-  AreaDropDown({super.key});
-
+  AreaDropDown({super.key,this.selectdAreaDropdown});
+  String? selectdAreaDropdown;
   @override
   State<AreaDropDown> createState() => _AreaDropDownState();
 }
 
 class _AreaDropDownState extends State<AreaDropDown> {
   late ContainerInteractionBloc _containerInteractionBloc;
-  List<String> items = ['Refrigerated', 'Dry', 'Damaged', 'Empty'];
+  List<String> items = ['refrigerated', 'dry', 'damaged', 'empty'];
   String? selectedValue;
 
   @override
@@ -21,7 +21,7 @@ class _AreaDropDownState extends State<AreaDropDown> {
     super.initState();
     // Set the default selected value here.
     // Choose the value from your 'items' list that you want to be selected initially.
-    selectedValue = items.first; // Selects the first item ('Refrigerated') by default.
+    selectedValue = widget.selectdAreaDropdown; // Selects the first item ('Refrigerated') by default.
     // Or you can select a specific item:
     // selectedValue = 'Damaged';
     _containerInteractionBloc = context.read<ContainerInteractionBloc>();
