@@ -1,29 +1,25 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gap/gap.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 
 class AreaDropDown extends StatefulWidget {
-  AreaDropDown({super.key,this.selectdAreaDropdown});
-  String? selectdAreaDropdown;
+  AreaDropDown({super.key, required this.selectdAreaDropdown});
+  String selectdAreaDropdown;
   @override
   State<AreaDropDown> createState() => _AreaDropDownState();
 }
 
 class _AreaDropDownState extends State<AreaDropDown> {
   late ContainerInteractionBloc _containerInteractionBloc;
-  List<String> items = ['refrigerated', 'dry', 'damaged', 'empty'];
-  String? selectedValue;
+  List<String> items = ['Refrigerated', 'Dry', 'Damaged', 'Empty'];
 
   @override
   void initState() {
     super.initState();
     // Set the default selected value here.
     // Choose the value from your 'items' list that you want to be selected initially.
-    selectedValue = widget.selectdAreaDropdown; // Selects the first item ('Refrigerated') by default.
     // Or you can select a specific item:
-    // selectedValue = 'Damaged';
     _containerInteractionBloc = context.read<ContainerInteractionBloc>();
   }
 
@@ -46,12 +42,13 @@ class _AreaDropDownState extends State<AreaDropDown> {
                   ),
                 ))
             .toList(),
-        value: selectedValue,
+        value: widget.selectdAreaDropdown,
         style: TextStyle(fontSize: 18),
         onChanged: (String? value) {
           setState(() {
-            selectedValue = value;
-            _containerInteractionBloc.add(DropdownAreaChanged(area: value!));
+            widget.selectdAreaDropdown = value!;
+            _containerInteractionBloc.add(DropdownAreaChanged(area: value));
+            _containerInteractionBloc.add(DropdownLotChanged(lotNo: null));
           });
         },
         buttonStyleData: ButtonStyleData(

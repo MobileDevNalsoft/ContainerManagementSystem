@@ -52,14 +52,14 @@ window.addInteractions = function () {
       } else if (name.includes("AREA")) {
         const areaLots = lotsData[`${name.split("_")[0]}`].lots;
         const totalLots = lotsData[`${name.split("_")[0]}`].max_lots;
-        const availableLots = Object.keys(areaLots).filter(
-          (lot) => areaLots[lot].length < 3
+        const occupiedLots = Object.keys(areaLots).filter(
+          (lot) => areaLots[lot].length == 3
         ).length;
         tooltip.style.display = "block";
         tooltip.innerHTML = `<strong>${name}</strong><div class="tooltip-content">
-                                            Available Lots: ${availableLots}<br>
-                                            Occupied Lots: ${
-                                              totalLots - availableLots
+                                            Occupied Lots: ${occupiedLots}<br>
+                                            Available Lots: ${
+                                              totalLots - occupiedLots
                                             }
                                             </div>`;
         setToolTipPosition(targetObject, tooltip, camera);

@@ -883,14 +883,12 @@ class DialogTopClipper extends CustomClipper<Path> {
   }
 }
 
-String initcapcase(String input) {
-  if (input.isEmpty) return input;
-
-  List<String> words = input.split(' ');
-  List<String> capitalizedWords = words.map((word) {
-    if (word.isEmpty) return word;
-    return word[0].toUpperCase() + word.substring(1).toLowerCase();
-  }).toList();
-
-  return capitalizedWords.join(' ');
+extension StringExtensions on String {
+  String toInitCapCase() {
+    return this
+        .split(' ') // Split the string into words
+        .map(
+            (word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}' : '') // Capitalize the first letter and lowercase the rest
+        .join(' '); // Join the words back with spaces
+  }
 }

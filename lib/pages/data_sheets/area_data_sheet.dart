@@ -34,10 +34,10 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
     if (_areaBloc.state.getSearchContainerStatus == SearchContainerStatus.initial) {
       _areaBloc.add(GetAreaData(area: widget.area));
     }
-    _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.firstWhere((e) => e.name == initcapcase(widget.area))));
+    _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.firstWhere((e) => e.name == widget.area.toInitCapCase())));
     _areaBloc.state.selectedCustomerIndex = 0;
-    print("widget area" + widget.area);
-    _containerInteractionBloc.state.selectedDropdownArea = widget.area.toLowerCase() == 'unassigned' ? 'Refrigerated' : widget.area.toLowerCase();
+    _areaBloc.state.selectedContainerIndex = 0;
+    _containerInteractionBloc.state.selectedDropdownArea = widget.area.toLowerCase() == 'unassigned' ? 'Refrigerated' : widget.area.toInitCapCase();
     // you will get the searched container area data
     // find the customer index from customers in area data then animate page with selected customer then container index using the customer data
     // then animate scroll to that container index.
@@ -420,7 +420,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           selectdAreaDropdown:
                                               context.read<ContainerInteractionBloc>().state.selectedDropdownArea.toString().toLowerCase() == 'unassigned'
                                                   ? 'Refrigerated'
-                                                  : context.read<ContainerInteractionBloc>().state.selectedDropdownArea,
+                                                  : context.read<ContainerInteractionBloc>().state.selectedDropdownArea!,
                                         ),
                                         Padding(
                                           padding: EdgeInsets.only(left: lsize.maxWidth * 0.01, top: lsize.maxHeight * 0.03, bottom: lsize.maxHeight * 0.02),
@@ -432,11 +432,9 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           ),
                                         ),
                                         BlocBuilder<ContainerInteractionBloc, ContainerInteractionState>(builder: (context, state) {
-                                          print('selected Area ${state.selectedDropdownArea}');
                                           return LotDropdown(
                                             selectedLot: state.selectedDropdownLot ?? 'Select Lot',
                                             suggestionsCallback: (pattern) {
-                                              print('selected Area in ${state.selectedDropdownArea}');
                                               List<String> lots = List.generate(
                                                 state.lotsData![state.selectedDropdownArea!.toUpperCase()]['max_lots'],
                                                 (index) => '${state.selectedDropdownArea!}_${index + 1}',

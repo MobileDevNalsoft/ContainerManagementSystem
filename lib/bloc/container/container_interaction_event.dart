@@ -90,10 +90,7 @@ class DropdownAreaChanged extends ContainerInteractionEvent {
 }
 
 class DropdownLotChanged extends ContainerInteractionEvent {
-  final String lotNo;
+  final String? lotNo;
 
-  DropdownLotChanged({required this.lotNo});
-
-  @override
-  List<Object> get props => [lotNo];
+  DropdownLotChanged({this.lotNo});
 }

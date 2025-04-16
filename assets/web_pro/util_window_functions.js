@@ -228,11 +228,12 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
   lotsData[currentLot] = lotsData[currentLot].filter(
     (obj) => obj.shipment != targetContainer
   );
-  console.warn('current lot data after filter '+lotsData[currentLot]);
+  console.warn('current lot data after filter '+JSON.stringify(lotsData[currentLot]));
 
   const targetAreaLotsData = globalThis.lotsData[`${targetAreaName}`]['lots'];
+  console.warn('target area lots data '+JSON.stringify(targetAreaLotsData));
   targetAreaLotsData[targetLot].push({ shipment: targetContainer, lvl: targetAreaLotsData[targetLot].length+1 });
-  console.warn('target lot data '+targetAreaLotsData[targetLot]);
+  console.warn('target lot data '+JSON.stringify(targetAreaLotsData[targetLot]));
   const count = targetAreaLotsData[targetLot].length;
   const targetLotObj = scene.getObjectByName(targetLot);
   const targetLotPosition = targetLotObj.position;
@@ -300,12 +301,13 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
             globalThis.objData.get(object.parent.uuid).containerNbr
           );
 
+          
           const currentTitleBoundingBox = new THREE.Box3().setFromObject(
             currentTitle
           );
           const currentTitleSize = new THREE.Vector3();
           currentTitleBoundingBox.getSize(currentTitleSize);
-
+          
           currentTitle.position.set(
             currentTitle.position.x,
             currentTitle.position.y - topCon * containerSize.y,
@@ -349,9 +351,9 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
   });
 
   targetTitle.position.set(
-    targetObject.parent.position.x + containerSize.x / 2,
-    targetObject.parent.position.y + containerSize.y / 2,
-    targetObject.parent.position.z + titleSize.z / 2
+    targetObject.position.x + containerSize.x / 2,
+    targetObject.position.y + containerSize.y / 2,
+    targetObject.position.z + titleSize.z / 2
   );
 
   globalThis.targetObject = null;

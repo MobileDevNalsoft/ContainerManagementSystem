@@ -87,7 +87,7 @@ final class ContainerInteractionState {
         sentDataToJS: sentDataToJS ?? this.sentDataToJS,
         selectedAreaName: selectedAreaName ?? this.selectedAreaName,
         selectedDropdownArea: selectedDropdownArea ?? this.selectedDropdownArea,
-        selectedDropdownLot: selectedDropdownLot ?? this.selectedDropdownLot,
+        selectedDropdownLot: selectedDropdownLot,
         modelLoaded: modelLoaded ?? this.modelLoaded,
         lotOfSelectedShipment: lotOfSelectedShipment ?? this.lotOfSelectedShipment);
   }
