@@ -210,6 +210,12 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                 ],
               ),
               Positioned(left: size.width * 0.15, top: size.height * 0.013, child: PointerInterceptor(child: SearchBarDropdown(size: size))),
+              if (context.watch<ContainerInteractionBloc>().state.getAddContainerStatus == AddContainerStatus.loading)
+                Center(
+                  child: SpinKitFadingCube(
+                    color: Colors.white,
+                  ),
+                )
             ],
           )),
     );
@@ -225,15 +231,6 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
   void jsToFlutter(Map<String, dynamic> data) {
     print(data);
     switch (data.keys.first) {
-      case 'lotNo':
-        Customs.AddContainerDialog(context: context, lotNo: data.values.first, area: data.values.last);
-        break;
-      case 'containerNbr':
-        Customs.RelocateContainerDialog(context: context, containerNbr: data.values.first, area: data['area'], lotNo: data.values.last);
-        break;
-      case 'deleteContainer':
-        Customs.DeleteContainerDialog(context: context, containerNbr: data.values.first, area: data.values.last);
-        break;
       case 'loaded':
         _containerInteractionBloc.add(ModelLoaded(loaded: true));
         break;

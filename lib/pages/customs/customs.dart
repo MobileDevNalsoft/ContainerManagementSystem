@@ -9,6 +9,7 @@ import 'package:lottie/lottie.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:warehouse_3d/bloc/area/area_bloc.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 import 'package:warehouse_3d/bloc/work_queue/work_queue_bloc.dart';
 import 'package:warehouse_3d/models/areas_model.dart';
@@ -551,9 +552,10 @@ class Customs {
     );
   }
 
-  static void DeleteContainerDialog({required BuildContext context, required String containerNbr, required String area}) {
+  static void DeleteContainerDialog(
+      {required BuildContext context, required String containerNbr, required String area, required PageController pageController}) {
     Size size = MediaQuery.of(context).size;
-    final ContainerInteractionBloc containerInteractionBloc = context.read<ContainerInteractionBloc>();
+    final AreaBloc areaBloc = context.read<AreaBloc>();
     showGeneralDialog(
       context: context,
       barrierColor: Colors.black45,
@@ -601,7 +603,15 @@ class Customs {
                             TextButton(
                                 onPressed: () {
                                   // containerInteractionBloc.add(DeleteContainer(area: area, containerNbr: containerNbr));
-                                  state.webViewController!.evaluateJavascript(source: 'deleteContainer("$containerNbr");');
+                                  if (areaBloc.state.customers![areaBloc.state.selectedCustomerIndex!].containers!.length == 1) {
+                                    pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.linear);
+                                    areaBloc.state.customers!.removeAt(areaBloc.state.selectedCustomerIndex!);
+                                  } else {
+                                    print('delete initiated');
+                                    areaBloc.state.customers![areaBloc.state.selectedCustomerIndex!].containers!
+                                        .removeAt(areaBloc.state.selectedContainerIndex!);
+                                  }
+                                  state.webViewController!.evaluateJavascript(source: 'deleteContainer("$containerNbr", "$area");');
                                   Navigator.pop(context);
                                 },
                                 style: TextButton.styleFrom(backgroundColor: const Color.fromRGBO(121, 65, 177, 1), foregroundColor: Colors.white),
@@ -777,8 +787,8 @@ class Customs {
                             Gap(size.height * 0.01),
                             TextButton(
                                 onPressed: () {
-                                  containerInteractionBloc
-                                      .add(RelocateContainer(area: area, containerNbr: containerNbr, lotNo: lotNoTextEditingController.text));
+                                  // containerInteractionBloc
+                                  //     .add(RelocateContainer(area: area, containerNbr: containerNbr, lotNo: lotNoTextEditingController.text));
                                   state.webViewController!
                                       .evaluateJavascript(source: 'relocateContainer("${lotNoTextEditingController.text}","$containerNbr","$area");');
                                   Navigator.pop(context);
@@ -841,7 +851,7 @@ class Customs {
 }
 
 String? containerNbrValidator(String value) {
-  RegExp regex = RegExp(r'^[A-Za-z]{4}\d{7}$');
+  RegExp regex = RegExp(r'^[A-Za-z]{2}\d{8}-\d{4}$');
   if (!regex.hasMatch(value)) {
     return "container number should contain first four alphabets followed by seven digits";
   }

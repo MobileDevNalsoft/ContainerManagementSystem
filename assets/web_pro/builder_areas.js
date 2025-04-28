@@ -35,7 +35,6 @@ window.buildAreas = async function () {
 
 let lots = [];
 let containers = [];
-let dragControls;
 const rowGap = 3;
 const columnGap = 20;
 const padding = 40;
@@ -100,7 +99,6 @@ async function buildArea(areaJson, areaLotsData, position, color) {
   areaGroup.add(borderGroup);
 
   const areaCenter = new THREE.Vector3();
-  area.updateMatrixWorld();
   area.getWorldPosition(areaCenter);
 
   const areaBoundingBox = new THREE.Box3().setFromObject(area);
@@ -130,7 +128,7 @@ async function buildArea(areaJson, areaLotsData, position, color) {
     scene.add(title);
   });
 
-  const gltf = await loadModel("../glbs/white_container.glb");
+  const gltf = await loadModel("../glbs/final_container.glb");
   const container = gltf.scene;
   // const containerGeometry = new THREE.BoxGeometry(8, 8, 20);
   // containerGeometry.translate(0, 4, 0);
@@ -142,6 +140,12 @@ async function buildArea(areaJson, areaLotsData, position, color) {
   const containerSize = new THREE.Vector3();
   containerBoundingBox.getSize(containerSize);
   globalThis.containerSize = containerSize;
+
+  const baseMesh = container.getObjectByProperty('type', 'Mesh')?.clone();
+  const sharedGeometry = baseMesh.geometry;
+  sharedGeometry.scale(0.029, 0.029, 0.029);
+  sharedGeometry.rotateY(Math.PI/2);
+  const sharedMaterial = baseMesh.material;
 
   for (let i = 0; i < totalRows; i++) {
     for (let j = 0; j < totalColumns; j++) {
@@ -174,25 +178,21 @@ async function buildArea(areaJson, areaLotsData, position, color) {
       lotGroup.add(border); // Add border to the scene
 
       const lotCenter = new THREE.Vector3();
-      lot.updateMatrixWorld();
       lot.getWorldPosition(lotCenter);
 
       const serialNumber = i + 1 + totalRows * j;
 
       await ThreeDText(serialNumber.toString(), 1, 0.1).then((title) => {
-        const titleBoundingBox = new THREE.Box3().setFromObject(title);
-        const titleSize = new THREE.Vector3();
-        titleBoundingBox.getSize(titleSize);
         title.rotation.x = -Math.PI / 2;
         title.position.set(
-          lot.position.x - titleSize.x / 2,
+          lot.position.x - 1,
           lot.position.y + 0.025,
           lot.position.z + lotDepth / 2.2
         );
         lotGroup.add(title);
       });
 
-      scene.add(lotGroup);
+      areaGroup.add(lotGroup);
 
       lot.name = areaJson.name + "_" + (i + 1 + totalRows * j);
       border.name = lot.name + "_border";
@@ -203,7 +203,9 @@ async function buildArea(areaJson, areaLotsData, position, color) {
 
       for (let i = 0; i < areaLotsData.lots[lot.name]?.length; i++) {
         const containerGroup = new THREE.Group();
-        const containerClone = container.clone();
+        const containerClone = new THREE.Mesh(sharedGeometry, sharedMaterial.clone());
+        const customColor = getColor();
+        containerClone.material.color.set(customColor);
         const containerName = 'CON_'+ areaLotsData.lots[lot.name][i].shipment;
         containerClone.name = containerName;
         containerClone.traverse((child) => {
@@ -216,29 +218,6 @@ async function buildArea(areaJson, areaLotsData, position, color) {
           lot.position.y + (areaLotsData.lots[lot.name][i].lvl - 1) * containerSize.y,
           lot.position.z
         );
-        const customColor = getColor();
-
-        // Iterate through all the meshes in the container and apply the color to their materials
-        containerClone.traverse((child) => {
-          if (child.isMesh) {
-            // For each mesh, check if it has a material and apply the color
-            if (child.material) {
-              // Clone the material so that each container has its own unique material
-              if (Array.isArray(child.material)) {
-                // Handle cases where multiple materials exist for a mesh (array of materials)
-                child.material.forEach((material) => {
-                  material = material.clone(); // Clone the material
-                  material.color.set(customColor); // Set the custom color
-                  child.material = material; // Apply the cloned material back to the mesh
-                });
-              } else {
-                // Single material for the mesh
-                child.material = child.material.clone(); // Clone the material
-                child.material.color.set(customColor); // Set the custom color
-              }
-            }
-          }
-        });
         containerGroup.add(containerClone);
 
         await ThreeDText(
@@ -247,25 +226,26 @@ async function buildArea(areaJson, areaLotsData, position, color) {
           0.1,
           0xffffff
         ).then((title) => {
-          const titleBoundingBox = new THREE.Box3().setFromObject(title);
-          const titleSize = new THREE.Vector3();
-          titleBoundingBox.getSize(titleSize);
           title.raycast = () => {};
           title.rotation.y = Math.PI / 2;
           title.position.set(
             containerClone.position.x + containerSize.x / 2,
-            containerClone.position.y + containerSize.y / 2,
-            containerClone.position.z + titleSize.x / 2
+            containerClone.position.y + containerSize.y/2,
+            containerClone.position.z + 6
           );
           title.name = areaLotsData.lots[lot.name][i].shipment;
           containerGroup.add(title);
         });
-        scene.add(containerGroup);
+        areaGroup.add(containerGroup);
         const uuid = containerClone.uuid;
         globalThis.objData.set(uuid, {
-          containerNbr: areaLotsData.lots[lot.name][i].shipment,
-          // arrivalTime: areaLotsData[lotNo][i]?.arrival_time,
-          // customerName: areaLotsData[lotNo][i]?.customer_name,
+          shipment: areaLotsData.lots[lot.name][i].shipment,
+          containerNbr: areaLotsData.lots[lot.name][i].container_nbr,
+          liner: areaLotsData.lots[lot.name][i].liner,
+          arrivalDate: areaLotsData.lots[lot.name][i].arrival_date,
+          expectedEndDate: areaLotsData.lots[lot.name][i]?.expected_end_date,
+          customerName: areaLotsData.lots[lot.name][i]?.customer,
+          days: areaLotsData.lots[lot.name][i]?.days,
           area: areaJson.name,
           lotNo: lot.name,
         });
@@ -274,6 +254,7 @@ async function buildArea(areaJson, areaLotsData, position, color) {
     }
   }
  
+//   scene.add(areaGroup);
   globalThis.containers = containers;
 }
 

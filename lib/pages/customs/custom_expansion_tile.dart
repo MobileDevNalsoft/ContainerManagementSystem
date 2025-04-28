@@ -9,12 +9,14 @@ class CustomExpansionTile extends StatefulWidget {
       this.initialWidth = 100,
       this.dropdownHeight = 20,
       this.margin,
+      required this.onExpand,
       required this.itemCount,
       required this.childBuilder,
       required this.dropDownBuilder});
   int itemCount;
   Widget Function(double height, double width, int index) childBuilder;
   Widget Function(int index) dropDownBuilder;
+  void Function(int index) onExpand;
   double initialHeight;
   double initialWidth;
   double dropdownHeight;
@@ -81,6 +83,7 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                           outerOpenDropdownIndex = null; // Reset opened index
                         } else {
                           // Close previously opened dropdown and open the new one
+                          widget.onExpand(oindex);
                           if (outerOpenDropdownIndex != null) {
                             heights[outerOpenDropdownIndex!] = widget.initialHeight; // Reset previous dropdown
                             bottomHeights[outerOpenDropdownIndex!] = widget.initialHeight; // Reset previous bottom height

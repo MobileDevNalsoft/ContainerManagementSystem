@@ -5,11 +5,11 @@ window.storeLotsData = function (data) {
 };
 
 window.storeLotsDataFromLocal = function () {
-  if(window.localStorage.getItem('area_lots_data') !== null){
-    globalThis.lotsData = JSON.parse(window.localStorage.getItem('area_lots_data'));
-  }else{
+  // if(window.localStorage.getItem('area_lots_data') !== null){
+  //   globalThis.lotsData = JSON.parse(window.localStorage.getItem('area_lots_data'));
+  // }else{
     console.log('{"getLotsData":"null"}');
-  }
+  // }
 }
 
 window.setCustomer = function (name) {
@@ -88,7 +88,6 @@ window.addContainer = async function (containerNbr, areaName) {
     "." +
     String(now.getMilliseconds()).padStart(3, "0");
 
-  console.log("customer name " + globalThis.customerName);
   const uuid = containerClone.uuid;
   globalThis.objData.set(uuid, {
     containerNbr: containerNbr,
@@ -101,53 +100,86 @@ window.addContainer = async function (containerNbr, areaName) {
   globalThis.targetObject = null;
 };
 
-window.deleteContainer = function (containerNbr) {
+window.deleteContainer = function (containerNbr, areaName) {
   const scene = globalThis.scene;
   const targetObject = scene.getObjectByName('CON_'+containerNbr);
-  let topCon = 1;
+  const currentLot = globalThis.objData.get(targetObject?.uuid).lotNo;
+  const containerSize = globalThis.containerSize;
+  const lotsData = globalThis.lotsData[`${areaName}`]['lots'];
+  console.warn('delete container '+targetObject.name);
+  console.warn('delete container before'+JSON.stringify(lotsData));
+  lotsData[currentLot] = lotsData[currentLot].filter(
+    (obj) => obj.shipment != targetContainer
+  );
 
   if (!targetObject) {
     console.warn("No target object selected.");
     return;
   }
 
+  console.warn('delete container after'+JSON.stringify(lotsData));
+
   globalThis.scene.traverse((object) => {
     if (object.isMesh) {
       // Ensure it's a 3D object, not a Group or Light
       if (
         object.name.includes("CON") &&
-        object.parent.position.x == targetObject.position.x &&
-        object.parent.position.z == targetObject.position.z
+        object.position.x == currentLotPosition.x &&
+        object.position.z == currentLotPosition.z
       ) {
-        console.log("obj name " + object.name);
         console.log(
-          `Object: ${object.name || object.uuid}, Position:`,
-          object.parent.position.x +
+          `relocation Object: ${object.name || object.parent.uuid || containerSize.y/2}, Position:`,
+          object.position.x +
             " " +
-            object.parent.position.y +
+            object.position.y +
             " " +
-            object.parent.position.z
+            object.position.z
         );
-        if (object.parent.position.y > 8) {
-          object.parent.position.set(
-            object.parent.position.x,
-            object.parent.position.y - topCon * containerSize.y,
-            object.parent.position.z
+        if (object.position.y > targetObject.position.y) {
+          object.position.set(
+            object.position.x,
+            object.position.y - containerSize.y,
+            object.position.z
           );
+
+            const customColor = getColor();
+
+            // Iterate through all the meshes in the container and apply the color to their materials
+            object.traverse((child) => {
+              if (child.isMesh) {
+                // For each mesh, check if it has a material and apply the color
+                if (child.material) {
+                  // Clone the material so that each container has its own unique material
+                  if (Array.isArray(child.material)) {
+                    // Handle cases where multiple materials exist for a mesh (array of materials)
+                    child.material.forEach((material) => {
+                      material = material.clone(); // Clone the material
+                      material.color.set(customColor); // Set the custom color
+                      child.material = material; // Apply the cloned material back to the mesh
+                    });
+                  } else {
+                    // Single material for the mesh
+                    child.material = child.material.clone(); // Clone the material
+                    child.material.color.set(customColor); // Set the custom color
+                  }
+                }
+              }
+            });
 
           const currentTitle = scene.getObjectByName(
-            object.name.split('_')[1]
+            globalThis.objData.get(object.uuid).containerNbr
           );
 
+          
           const currentTitleBoundingBox = new THREE.Box3().setFromObject(
             currentTitle
           );
           const currentTitleSize = new THREE.Vector3();
           currentTitleBoundingBox.getSize(currentTitleSize);
-
+          
           currentTitle.position.set(
             currentTitle.position.x,
-            currentTitle.position.y - topCon * containerSize.y,
+            currentTitle.position.y - containerSize.y,
             currentTitle.position.z
           );
         }
@@ -220,20 +252,13 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
   const scene = globalThis.scene;
   const targetObject = scene.getObjectByName('CON_'+targetContainer);
   const currentLot = globalThis.objData.get(targetObject?.uuid).lotNo;
-  console.warn("lotNo " + currentLot);
   const containerSize = globalThis.containerSize;
   const lotsData = globalThis.lotsData[`${areaName}`]['lots'];
-  console.warn('data '+JSON.stringify(lotsData));
-  console.warn('current lot data before filter '+JSON.stringify(lotsData[currentLot]));
   lotsData[currentLot] = lotsData[currentLot].filter(
     (obj) => obj.shipment != targetContainer
   );
-  console.warn('current lot data after filter '+JSON.stringify(lotsData[currentLot]));
-
   const targetAreaLotsData = globalThis.lotsData[`${targetAreaName}`]['lots'];
-  console.warn('target area lots data '+JSON.stringify(targetAreaLotsData));
   targetAreaLotsData[targetLot].push({ shipment: targetContainer, lvl: targetAreaLotsData[targetLot].length+1 });
-  console.warn('target lot data '+JSON.stringify(targetAreaLotsData[targetLot]));
   const count = targetAreaLotsData[targetLot].length;
   const targetLotObj = scene.getObjectByName(targetLot);
   const targetLotPosition = targetLotObj.position;
@@ -248,29 +273,28 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
 
   highlightLotAndContainer(targetObject, targetTitle, targetLotObj);
 
-  let topCon = 1;
-
   globalThis.scene.traverse((object) => {
     if (object.isMesh) {
       // Ensure it's a 3D object, not a Group or Light
       if (
         object.name.includes("CON") &&
-        object.parent.position.x == currentLotPosition.x &&
-        object.parent.position.z == currentLotPosition.z
+        object.position.x == currentLotPosition.x &&
+        object.position.z == currentLotPosition.z
       ) {
+        console.warn('relocation container name '+object.name);
         console.log(
-          `Object: ${object.name || object.parent.uuid || containerSize.y/2}, Position:`,
-          object.parent.position.x +
+          `relocation Object: ${object.name || object.parent.uuid || containerSize.y/2}, Position:`,
+          object.position.x +
             " " +
-            object.parent.position.y +
+            object.position.y +
             " " +
-            object.parent.position.z
+            object.position.z
         );
-        if (object.parent.position.y > targetObject.position.y) {
-          object.parent.position.set(
-            object.parent.position.x,
-            object.parent.position.y - topCon * containerSize.y,
-            object.parent.position.z
+        if (object.position.y > targetObject.position.y) {
+          object.position.set(
+            object.position.x,
+            object.position.y - containerSize.y,
+            object.position.z
           );
 
             const customColor = getColor();
@@ -298,7 +322,7 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
             });
 
           const currentTitle = scene.getObjectByName(
-            globalThis.objData.get(object.parent.uuid).containerNbr
+            globalThis.objData.get(object.uuid).containerNbr
           );
 
           
@@ -310,7 +334,7 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
           
           currentTitle.position.set(
             currentTitle.position.x,
-            currentTitle.position.y - topCon * containerSize.y,
+            currentTitle.position.y - containerSize.y,
             currentTitle.position.z
           );
         }
@@ -359,6 +383,8 @@ window.relocateContainer = function (targetLot, targetContainer, areaName, targe
   globalThis.targetObject = null;
 };
 
+const activeHighlights = new Map();
+
 function highlightLotAndContainer(
   container,
   title,
@@ -367,10 +393,20 @@ function highlightLotAndContainer(
   duration = 3000,
   interval = 500
 ) {
+  const key = lot.uuid;
+
+  // If it's already blinking — skip this call
+  if (lot.userData.isBlinking) {
+    console.log(`Highlight already active for ${lot.name}, skipping.`);
+    return;
+  }
+
   const originalColor = lot.material.color.getHex();
 
-  const blinkInterval = setInterval(() => {
-    if (container.visible == true) {
+  lot.userData.isBlinking = true;
+
+  const intervalId = setInterval(() => {
+    if (container.visible === true) {
       lot.material.color.set(highlightColor);
     } else {
       lot.material.color.set(originalColor);
@@ -379,14 +415,18 @@ function highlightLotAndContainer(
     title.visible = container.visible;
   }, interval);
 
-  // Revert the color after the specified duration
-  setTimeout(() => {
-    clearInterval(blinkInterval);
+  const timeoutId = setTimeout(() => {
+    clearInterval(intervalId);
     container.visible = true;
     title.visible = true;
     lot.material.color.set(originalColor);
+    lot.userData.isBlinking = false;
+    activeHighlights.delete(key);
   }, duration);
+
+  activeHighlights.set(key, { intervalId, timeoutId });
 }
+
 
 window.goToContainer = function (containerNbr, lotNo){
   const scene = globalThis.scene;

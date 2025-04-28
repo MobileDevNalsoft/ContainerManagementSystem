@@ -21,13 +21,23 @@ class _LotDropdownState extends State<LotDropdown> {
 
   SuggestionsController suggestionsController = SuggestionsController();
 
+  double turns = 1;
+
   @override
   void initState() {
     super.initState();
+    lotNoTextEditingController.text = widget.selectedLot;
     lotNoFocusNode.addListener(
       () {
         if (lotNoFocusNode.hasFocus) {
           suggestionsController.refresh();
+          setState(() {
+            turns = 0.5;
+          });
+        } else {
+          setState(() {
+            turns = 1;
+          });
         }
       },
     );
@@ -52,31 +62,46 @@ class _LotDropdownState extends State<LotDropdown> {
         controller: lotNoTextEditingController,
         suggestionsController: suggestionsController,
         builder: (context, controller, focusNode) {
-          print('Focus Node : ${focusNode.hasFocus}');
           return TextFormField(
             controller: controller,
             focusNode: focusNode,
             onChanged: (value) {},
-            style: TextStyle(fontSize: 14, color: Color.fromRGBO(111, 54, 167, 1)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.only(left: size.width * 0.008, bottom: size.height * 0.008),
-
-              hintText: focusNode.hasFocus ? 'Choose' : widget.selectedLot,
-              hintStyle: TextStyle(fontSize: 14, color: Color.fromRGBO(111, 54, 167, 1)),
-              border: InputBorder.none, // Removes all borders
-            ),
+                contentPadding: EdgeInsets.only(left: size.width * 0.009, bottom: size.height * 0.007, top: size.height * 0.015),
+                hintText: 'Choose',
+                hintStyle: TextStyle(fontSize: 14),
+                border: InputBorder.none, // Removes all borders
+                suffixIcon: AnimatedRotation(
+                  turns: turns,
+                  duration: Duration(milliseconds: 500),
+                  child: Icon(Icons.keyboard_arrow_down_rounded),
+                )),
           );
         },
+        emptyBuilder: (context) => Expanded(
+            child: Container(
+          height: size.height * 0.06,
+          width: double.infinity,
+          padding: EdgeInsets.only(left: size.width * 0.01),
+          decoration: BoxDecoration(
+            color: const Color.fromRGBO(164, 111, 218, 1),
+          ),
+          alignment: Alignment.centerLeft,
+          child: Text('no data found'),
+        )),
         itemBuilder: (context, value) {
           return SizedBox(
             width: size.height * 0.2,
             child: ListTile(
               style: ListTileStyle.drawer,
               tileColor: const Color.fromRGBO(164, 111, 218, 1),
-              textColor: Color.fromRGBO(111, 54, 167, 1),
+              textColor: Colors.black,
               title: Text(
                 value.toString(),
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
               ),
             ),
           );
@@ -84,6 +109,7 @@ class _LotDropdownState extends State<LotDropdown> {
         suggestionsCallback: widget.suggestionsCallback,
         onSelected: (value) {
           context.read<ContainerInteractionBloc>().add(DropdownLotChanged(lotNo: value));
+          lotNoTextEditingController.text = value;
           lotNoFocusNode.unfocus();
         },
       ),

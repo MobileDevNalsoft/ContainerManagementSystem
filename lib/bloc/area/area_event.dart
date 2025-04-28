@@ -5,6 +5,16 @@ abstract class AreaEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class GetAvailableLots extends AreaEvent {
+  final String area;
+  final String containerNbr;
+
+  GetAvailableLots({required this.area, required this.containerNbr});
+
+  @override
+  List<Object> get props => [area, containerNbr];
+}
+
 class GetAreaData extends AreaEvent {
   final String area;
 

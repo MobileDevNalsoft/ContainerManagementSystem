@@ -26,7 +26,7 @@ window.addInteractions = function () {
       globalThis.hoverObject = targetObject;
       const name = targetObject.name;
       if (name.includes("CON")) {
-        const uuid = targetObject.parent?.uuid;
+        const uuid = targetObject.uuid;
         if (uuid && globalThis.objData.has(uuid)) {
           const containerData = globalThis.objData.get(uuid);
           switch (containerData.area) {
@@ -34,17 +34,22 @@ window.addInteractions = function () {
             case "REFRIGERATED":
             case "EMPTY":
             case "DAMAGED":
-              // const arrivalDate = containerData.arrivalTime.split(" ")[0];
-              // const detentionDays = getDaysDiff(arrivalDate);
-              // const detentionText =
-              //   detentionDays > 0 ? `Detention Days: ${detentionDays}<br>Detention Cost: ${detentionDays*500}Rs` : "";
+            case "UNASSIGNED":
+              const detentionDays = containerData.days - 15;
+              const detentionText =
+              detentionDays > 0 ? `Detention Days : ${detentionDays}<br>Detention Cost : ${detentionDays*2000}Rs` : "";
               tooltip.style.display = "block";
-              tooltip.innerHTML = `<strong>${containerData.containerNbr}</strong>`;
-                                            // <div class="tooltip-content">
-                                            // Customer Name: ${containerData.customerName}<br>
-                                            // Arrival Date: ${arrivalDate}<br>
-                                            // ${detentionText}
-                                            // </div>`;
+              tooltip.innerHTML = `<strong>${containerData.shipment}</strong>
+                                            <div class="tooltip-content">
+                                            Container Nbr : ${containerData.containerNbr}<br>
+                                            Liner Name : ${containerData.liner}<br>
+                                            Customer Name : ${containerData.customerName}<br>
+                                            Arrival Date : ${containerData.arrivalDate}<br>
+                                            Expected End Date : ${containerData.expectedEndDate}<br>
+                                            Utilized Days : ${containerData.days}<br>
+                                            Free Days : 15<br>
+                                            ${detentionText}
+                                            </div>`;
               break;
           }
           setToolTipPosition(targetObject, tooltip, camera);

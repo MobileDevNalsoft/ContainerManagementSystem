@@ -99,15 +99,30 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
   Future<void> _onRelocateContainer(RelocateContainer event, Emitter<ContainerInteractionState> emit) async {
     emit(state.copyWith(getAddContainerStatus: AddContainerStatus.loading));
 
+    String containerNbr = event.containerNbr;
+    String lotNo = event.lotNo;
+    String currentArea = event.currentArea;
+    String targetArea = event.targetArea;
+    print('target area ${event.targetArea}');
+    int level = state.lotsData![targetArea]['lots'][lotNo].length + 1;
+
     try {
-      await _networkCalls.post(AppConstants.RELOCATE_CONTAINER, data: {
-        "area": event.area,
-        "lot_no": event.lotNo,
-        "container_nbr": event.containerNbr,
-      }).then(
+      await _networkCalls.post(AppConstants.LOCATE_CONTAINER,
+          data: {"current_lot_no": state.lotOfSelectedShipment, "target_lot_no": lotNo, "lvl": level, "shipment": containerNbr, "area": targetArea}).then(
         (apiResponse) {
-          add(GetLotsData());
-          emit(state.copyWith(getAddContainerStatus: AddContainerStatus.success));
+          Map<String, dynamic> data = jsonDecode(apiResponse.response!.data!);
+          if (data['response_code'] == 200) {
+            emit(state.copyWith(getAddContainerStatus: AddContainerStatus.success));
+            state.lotsData![currentArea]['lots'][state.lotOfSelectedShipment].remove({"shipment": containerNbr, "lvl": level});
+            state.lotsData![targetArea]['lots'][lotNo].add({"shipment": containerNbr, "lvl": level});
+            state.webViewController!.evaluateJavascript(source: 'relocateContainer("$lotNo","$containerNbr","$currentArea","$targetArea");');
+
+            Future.delayed(Duration(seconds: 3),
+                () => state.webViewController!.evaluateJavascript(source: 'switchCamera("${state.selectedAreaName!.name.toUpperCase()}_AREA")'));
+          } else {
+            print(data['response_message']);
+            Error();
+          }
         },
       );
     } catch (e) {

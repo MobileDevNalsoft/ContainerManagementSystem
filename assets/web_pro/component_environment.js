@@ -9,8 +9,8 @@ window.loadEnvironment = async function (topLeftCorner) {
   createLand();
   // await loadSurroundings();
   // await loadHysterStacker();
-  // await loadTruck();
-  // await addParkingArea();
+  await loadTruck();
+  await addParkingArea();
   // addClouds();
   // addFencing();
   // await createCustomRoad();
@@ -70,7 +70,7 @@ async function loadTruck(){
   const gltf = await loadModel("../glbs/truck1.glb");
   const model = gltf.scene;
   truck.add(model);
-  const conGltf = await loadModel("../glbs/white_container.glb");
+  const conGltf = await loadModel("../glbs/final_container.glb");
   const container = conGltf.scene;
   container.position.set(0,6,6);
   truck.add(container);
@@ -112,17 +112,17 @@ async function addParkingArea(){
   }
 
   const truck1 = getTruck()
-  truck1.position.set(260,0,170);
+  truck1.position.set(260,0,173);
   truck1.rotateY(-Math.PI/3);
   scene.add(truck1);
 
   const truck2 = getTruck(0xff0000)
-  truck2.position.set(260,0,195);
+  truck2.position.set(260,0,198);
   truck2.rotateY(-Math.PI/3);
   scene.add(truck2);
 
   const truck3 = getTruck(0x6484f3)
-  truck3.position.set(260,0,245);
+  truck3.position.set(260,0,248);
   truck3.rotateY(-Math.PI/3);
   scene.add(truck3);
 }
@@ -130,7 +130,7 @@ async function addParkingArea(){
 async function createCustomRoad() {
   const barrierGltf = await loadModel("../glbs/automatic_boom_barriers.glb");
   const barrierModel = barrierGltf.scene;
-  barrierModel.position.set(128, 0, 326);
+  barrierModel.position.set(128, 0, 350);
   scene.add(barrierModel);
 
   const roadPoints = [

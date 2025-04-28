@@ -34,14 +34,15 @@ class AddContainer extends ContainerInteractionEvent {
 }
 
 class RelocateContainer extends ContainerInteractionEvent {
-  final String area;
+  final String targetArea;
+  final String currentArea;
   final String containerNbr;
   final String lotNo;
 
-  RelocateContainer({required this.containerNbr, required this.lotNo, required this.area});
+  RelocateContainer({required this.containerNbr, required this.lotNo, required this.targetArea, required this.currentArea});
 
   @override
-  List<Object> get props => [containerNbr, lotNo, area];
+  List<Object> get props => [containerNbr, lotNo, targetArea, currentArea];
 }
 
 class DeleteContainer extends ContainerInteractionEvent {

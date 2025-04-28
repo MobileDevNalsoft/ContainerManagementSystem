@@ -11,27 +11,25 @@ class Customer {
 }
 
 class ContainerData {
+  String? shipmentNbr;
   String? containerNbr;
+  String? liner;
   String? lotNo;
-  String? arrivalTime;
+  int? level;
+  DateTime? arrivalTime;
+  DateTime? expectedEndTime;
+  int? days;
+  String? toArea;
 
   ContainerData.fromJson(Map<String, dynamic> json) {
-    containerNbr = json['shipment'];
-    lotNo = json['lot_no'];
-    arrivalTime = json['arrival_time'];
-  }
-}
-
-class SearchedContainer {
-  String? containerNbr;
-  String? area;
-  String? customerName;
-
-  SearchedContainer({this.containerNbr, this.area, this.customerName});
-
-  SearchedContainer.fromJson(Map<String, dynamic> json) {
+    shipmentNbr = json['shipment'];
     containerNbr = json['container_nbr'];
-    area = json['area'];
-    customerName = json['customer_name'];
+    liner = json['liner'];
+    lotNo = json['lot_no'];
+    toArea = json['to_area'];
+    level = json['level'];
+    arrivalTime = DateTime.parse(json['arrival_time']);
+    expectedEndTime = DateTime.parse(json['expected_end_time']);
+    days = json['days'];
   }
 }
