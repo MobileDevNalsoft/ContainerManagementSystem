@@ -97,8 +97,8 @@ class _SearchBarDropdownState extends State<SearchBarDropdown> {
                               _areaBloc.state.getSearchContainerStatus = SearchContainerStatus.initial;
                               _containerInteractionBloc.state.searchTextController!.clear();
                               _containerInteractionBloc.add(SelectedArea(selectedArea: AreaName.values.sublist(1)[index]));
-                              _containerInteractionBloc.state.webViewController!
-                                  .evaluateJavascript(source: 'switchCamera("${AreaName.values.sublist(1)[index].name.toUpperCase()}_AREA")');
+                              // _containerInteractionBloc.state.webViewController!
+                              //     .evaluateJavascript(source: 'switchCamera("${AreaName.values.sublist(1)[index].name.toUpperCase()}_AREA")');
                               _containerInteractionBloc.add(DataFromJS(dataFromJS: {"area": AreaName.values.sublist(1)[index].name.toUpperCase()}));
                               height = height == size.height * 0.3
                                   ? size.height * 0.08

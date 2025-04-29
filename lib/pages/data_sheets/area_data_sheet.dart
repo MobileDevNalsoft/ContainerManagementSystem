@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -256,7 +258,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                             ),
                             Expanded(
                               child: CustomExpansionTile(
-                                initialHeight: lsize.maxHeight * 0.14,
+                                initialHeight: lsize.maxHeight * 0.3,
                                 initialWidth: lsize.maxWidth,
                                 dropdownHeight: lsize.maxHeight * 0.05,
                                 margin: EdgeInsets.only(bottom: lsize.maxHeight * 0.018),
@@ -286,37 +288,105 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           Row(
                                             children: [
                                               Gap(lsize.maxWidth * 0.03),
+                                              Transform.translate(
+                                                offset: Offset(0, -lsize.maxHeight * 0.02),
+                                                child: Image.asset(
+                                                  'assets/images/shipment.png',
+                                                  scale: lsize.maxHeight * 0.028,
+                                                ),
+                                              ),
+                                              Gap(lsize.maxWidth * 0.04),
+                                              Text(
+                                                container.shipmentNbr!,
+                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                              ),
+                                            ],
+                                          ),
+                                          Gap(lsize.maxHeight * 0.06),
+                                          Row(
+                                            children: [
+                                              Gap(lsize.maxWidth * 0.152),
                                               Image.asset(
                                                 'assets/images/container.png',
-                                                scale: lsize.maxHeight * 0.022,
+                                                scale: lsize.maxHeight * 0.016,
                                               ),
                                               Gap(lsize.maxWidth * 0.03),
                                               Text(
                                                 container.containerNbr!,
-                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                                               ),
                                               Gap(lsize.maxWidth * 0.03),
                                             ],
                                           ),
-                                          Gap(lsize.maxWidth * 0.01),
+                                          Gap(lsize.maxHeight * 0.05),
                                           Row(
                                             children: [
-                                              Gap(lsize.maxWidth * 0.16),
+                                              Gap(lsize.maxWidth * 0.152),
+                                              Image.asset(
+                                                'assets/images/liner.png',
+                                                scale: lsize.maxHeight * 0.042,
+                                              ),
+                                              Gap(lsize.maxWidth * 0.034),
+                                              Text(
+                                                container.liner!,
+                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                              ),
+                                              Gap(lsize.maxWidth * 0.03),
+                                            ],
+                                          ),
+                                          Gap(lsize.maxWidth * 0.03),
+                                          Row(
+                                            children: [
+                                              Gap(lsize.maxWidth * 0.154),
                                               Text(
                                                 'lot ${RegExp(r'\d+').stringMatch(container.lotNo!).toString()} - lvl ${container.level}',
                                                 style: const TextStyle(
-                                                  color: Color.fromARGB(255, 193, 193, 193),
-                                                  fontWeight: FontWeight.bold,
+                                                  color: Color.fromARGB(255, 229, 229, 229),
                                                   fontSize: 14,
                                                 ),
-                                              ),
-                                              const Spacer(),
-                                              Text(
-                                                DateFormat('dd MMMM, hh:mm a').format(container.arrivalTime!),
-                                                style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
-                                              ),
+                                              )
                                             ],
                                           ),
+                                          Spacer(),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Transform.rotate(
+                                                    angle: -math.pi / 1.2,
+                                                    child: Image.asset(
+                                                      'assets/images/left_arrow.png',
+                                                      scale: lsize.maxHeight * 0.04,
+                                                      color: Color.fromARGB(255, 229, 229, 229),
+                                                    ),
+                                                  ),
+                                                  Gap(lsize.maxWidth * 0.03),
+                                                  Text(
+                                                    DateFormat('dd MMMM, hh:mm a').format(container.arrivalTime!),
+                                                    style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Transform.rotate(
+                                                    angle: math.pi / 1.3,
+                                                    child: Image.asset(
+                                                      'assets/images/left_arrow.png',
+                                                      scale: lsize.maxHeight * 0.04,
+                                                      color: Color.fromARGB(255, 229, 229, 229),
+                                                    ),
+                                                  ),
+                                                  Gap(lsize.maxWidth * 0.03),
+                                                  Text(
+                                                    DateFormat('dd MMMM, hh:mm a').format(container.expectedEndTime!),
+                                                    style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          )
                                         ],
                                       );
                                     }),
@@ -334,7 +404,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           },
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.031, bottom: lsize.maxHeight * 0.007),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.064, bottom: lsize.maxHeight * 0.007),
                                             decoration: const BoxDecoration(
                                               color: Color.fromARGB(255, 89, 201, 147),
                                               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15)),
@@ -359,7 +429,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           },
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.031, bottom: lsize.maxHeight * 0.007),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.064, bottom: lsize.maxHeight * 0.007),
                                             decoration: const BoxDecoration(color: Color.fromARGB(255, 102, 102, 213)),
                                             child: Image.asset(
                                               'assets/images/${widget.area == 'UNASSIGNED' ? 'allocate' : 'relocate'}.png',
@@ -379,7 +449,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           },
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.031, bottom: lsize.maxHeight * 0.007),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.064, bottom: lsize.maxHeight * 0.007),
                                             decoration: const BoxDecoration(
                                               color: Color.fromARGB(255, 216, 97, 97),
                                               borderRadius: BorderRadius.only(bottomRight: Radius.circular(15)),
