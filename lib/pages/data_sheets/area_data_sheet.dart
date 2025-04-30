@@ -67,7 +67,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
           listener: (context, state) {
             if (state.getAddContainerStatus == AddContainerStatus.success) {
               if (_areaBloc.state.customers![_areaBloc.state.selectedCustomerIndex!].containers!.length == 1 && widget.area == 'UNASSIGNED') {
-                pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.linear);
+                pageController.animateToPage(0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                 _areaBloc.state.customers!.removeAt(_areaBloc.state.selectedCustomerIndex!);
               } else if (widget.area == 'UNASSIGNED') {
                 pageController.animateToPage(1, duration: const Duration(milliseconds: 500), curve: Curves.linear);
@@ -225,16 +225,16 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                 padding: EdgeInsets.symmetric(horizontal: lsize.maxWidth * 0.03),
                                 margin: EdgeInsets.only(bottom: lsize.maxHeight * 0.03),
                                 decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(164, 111, 218, 1),
+                                  color: const Color.fromRGBO(121, 65, 177, 1),
                                   borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(width: 3, color: const Color.fromRGBO(111, 54, 167, 1)),
+                                  border: Border.all(width: 3, color: const Color.fromARGB(255, 96, 46, 147)),
                                 ),
                                 child: Row(
                                   children: [
                                     Image.asset(
                                       'assets/images/businessman.png',
                                       scale: lsize.maxHeight * 0.004,
-                                      color: const Color.fromRGBO(111, 54, 167, 1),
+                                      color: Colors.white,
                                     ),
                                     Gap(lsize.maxWidth * 0.05),
                                     Expanded(
@@ -244,7 +244,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           state.customers![customerIndex].customerName!,
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
-                                            color: Color.fromRGBO(111, 54, 167, 1),
+                                            color: Colors.white,
                                             fontSize: 16,
                                             letterSpacing: 1.6,
                                             fontWeight: FontWeight.bold,
@@ -258,7 +258,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                             ),
                             Expanded(
                               child: CustomExpansionTile(
-                                initialHeight: lsize.maxHeight * 0.3,
+                                initialHeight: lsize.maxHeight * 0.44,
                                 initialWidth: lsize.maxWidth,
                                 dropdownHeight: lsize.maxHeight * 0.05,
                                 margin: EdgeInsets.only(bottom: lsize.maxHeight * 0.018),
@@ -270,126 +270,265 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                   state.customers![customerIndex].containers!.sort(
                                     (a, b) => int.parse(RegExp(r'\d+').stringMatch(a.lotNo!)!).compareTo(int.parse(RegExp(r'\d+').stringMatch(b.lotNo!)!)),
                                   );
+                                  int days = state.customers![state.selectedCustomerIndex!].containers![index].days!;
                                   ContainerData container = state.customers![customerIndex].containers![index];
-                                  return Container(
-                                    height: height,
-                                    width: width,
-                                    padding: EdgeInsets.all(lsize.maxWidth * 0.02),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromRGBO(121, 65, 177, 1),
-                                      borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(width: 4, color: const Color.fromRGBO(142, 84, 199, 1)),
-                                    ),
-                                    child: LayoutBuilder(builder: (context, lsize) {
-                                      return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Gap(lsize.maxHeight * 0.08),
-                                          Row(
+                                  return Stack(
+                                    alignment: Alignment.topLeft,
+                                    children: [
+                                      Container(
+                                        height: height,
+                                        width: width,
+                                        padding: EdgeInsets.all(lsize.maxWidth * 0.02),
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromRGBO(121, 65, 177, 1),
+                                          borderRadius: BorderRadius.circular(15),
+                                          border: Border.all(width: 4, color: const Color.fromRGBO(142, 84, 199, 1)),
+                                        ),
+                                        child: LayoutBuilder(builder: (context, lsize) {
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Gap(lsize.maxWidth * 0.03),
-                                              Transform.translate(
-                                                offset: Offset(0, -lsize.maxHeight * 0.02),
-                                                child: Image.asset(
-                                                  'assets/images/shipment.png',
-                                                  scale: lsize.maxHeight * 0.028,
-                                                ),
-                                              ),
-                                              Gap(lsize.maxWidth * 0.04),
-                                              Text(
-                                                container.shipmentNbr!,
-                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                                              ),
-                                            ],
-                                          ),
-                                          Gap(lsize.maxHeight * 0.06),
-                                          Row(
-                                            children: [
-                                              Gap(lsize.maxWidth * 0.152),
-                                              Image.asset(
-                                                'assets/images/container.png',
-                                                scale: lsize.maxHeight * 0.016,
-                                              ),
-                                              Gap(lsize.maxWidth * 0.03),
-                                              Text(
-                                                container.containerNbr!,
-                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                                              ),
-                                              Gap(lsize.maxWidth * 0.03),
-                                            ],
-                                          ),
-                                          Gap(lsize.maxHeight * 0.05),
-                                          Row(
-                                            children: [
-                                              Gap(lsize.maxWidth * 0.152),
-                                              Image.asset(
-                                                'assets/images/liner.png',
-                                                scale: lsize.maxHeight * 0.042,
-                                              ),
-                                              Gap(lsize.maxWidth * 0.034),
-                                              Text(
-                                                container.liner!,
-                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                                              ),
-                                              Gap(lsize.maxWidth * 0.03),
-                                            ],
-                                          ),
-                                          Gap(lsize.maxWidth * 0.03),
-                                          Row(
-                                            children: [
-                                              Gap(lsize.maxWidth * 0.154),
-                                              Text(
-                                                'lot ${RegExp(r'\d+').stringMatch(container.lotNo!).toString()} - lvl ${container.level}',
-                                                style: const TextStyle(
-                                                  color: Color.fromARGB(255, 229, 229, 229),
-                                                  fontSize: 14,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          Spacer(),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
+                                              Gap(lsize.maxHeight * 0.08),
                                               Row(
                                                 children: [
-                                                  Transform.rotate(
-                                                    angle: -math.pi / 1.2,
+                                                  Gap(lsize.maxWidth * 0.03),
+                                                  Transform.translate(
+                                                    offset: Offset(0, -lsize.maxHeight * 0.02),
                                                     child: Image.asset(
-                                                      'assets/images/left_arrow.png',
-                                                      scale: lsize.maxHeight * 0.04,
-                                                      color: Color.fromARGB(255, 229, 229, 229),
+                                                      'assets/images/shipment.png',
+                                                      scale: lsize.maxHeight * 0.018,
                                                     ),
                                                   ),
-                                                  Gap(lsize.maxWidth * 0.03),
+                                                  Gap(lsize.maxWidth * 0.04),
                                                   Text(
-                                                    DateFormat('dd MMMM, hh:mm a').format(container.arrivalTime!),
-                                                    style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
+                                                    container.shipmentNbr!,
+                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                                                   ),
                                                 ],
                                               ),
+                                              Gap(lsize.maxHeight * 0.06),
                                               Row(
                                                 children: [
-                                                  Transform.rotate(
-                                                    angle: math.pi / 1.3,
-                                                    child: Image.asset(
-                                                      'assets/images/left_arrow.png',
-                                                      scale: lsize.maxHeight * 0.04,
-                                                      color: Color.fromARGB(255, 229, 229, 229),
-                                                    ),
+                                                  Gap(lsize.maxWidth * 0.152),
+                                                  Image.asset(
+                                                    'assets/images/container.png',
+                                                    scale: lsize.maxHeight * 0.01,
                                                   ),
                                                   Gap(lsize.maxWidth * 0.03),
                                                   Text(
-                                                    DateFormat('dd MMMM, hh:mm a').format(container.expectedEndTime!),
-                                                    style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
+                                                    container.containerNbr!,
+                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                                                   ),
+                                                  Gap(lsize.maxWidth * 0.03),
+                                                ],
+                                              ),
+                                              Gap(lsize.maxHeight * 0.05),
+                                              Row(
+                                                children: [
+                                                  Gap(lsize.maxWidth * 0.152),
+                                                  Image.asset(
+                                                    'assets/images/liner.png',
+                                                    scale: lsize.maxHeight * 0.026,
+                                                  ),
+                                                  Gap(lsize.maxWidth * 0.034),
+                                                  Text(
+                                                    container.liner!,
+                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                                  ),
+                                                  Gap(lsize.maxWidth * 0.03),
+                                                ],
+                                              ),
+                                              Gap(lsize.maxWidth * 0.03),
+                                              Row(
+                                                children: [
+                                                  Gap(lsize.maxWidth * 0.154),
+                                                  Text(
+                                                    'lot ${RegExp(r'\d+').stringMatch(container.lotNo!).toString()} - lvl ${container.level}',
+                                                    style: const TextStyle(
+                                                      color: Color.fromARGB(255, 229, 229, 229),
+                                                      fontSize: 14,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              Gap(lsize.maxHeight * 0.04),
+                                              IntrinsicWidth(
+                                                child: Container(
+                                                  height: lsize.maxWidth * 0.22,
+                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), color: Color.fromRGBO(164, 111, 218, 1)),
+                                                  padding: EdgeInsets.only(
+                                                      top: lsize.maxHeight * 0.02, bottom: lsize.maxHeight * 0.02, right: lsize.maxHeight * 0.02),
+                                                  child: Row(
+                                                    children: [
+                                                      Transform.rotate(
+                                                          angle: -math.pi / 2,
+                                                          child: Text(
+                                                            'Days',
+                                                            style: TextStyle(color: Colors.white),
+                                                          )),
+                                                      Expanded(
+                                                        child: ClipRRect(
+                                                          borderRadius: BorderRadius.circular(12),
+                                                          child: SingleChildScrollView(
+                                                            scrollDirection: Axis.horizontal,
+                                                            child: Row(
+                                                              children: [
+                                                                Container(
+                                                                  width: lsize.maxWidth * 0.25,
+                                                                  padding: EdgeInsets.all(lsize.maxHeight * 0.02),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: BorderRadius.circular(15), color: const Color.fromRGBO(95, 43, 147, 1)),
+                                                                  child: Column(
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    children: [
+                                                                      Text(
+                                                                        days.toString(), // the number part
+                                                                        style: TextStyle(
+                                                                          fontSize: 16, // Bigger font size
+                                                                          color: Colors.white, // White color
+                                                                          fontWeight: FontWeight.bold,
+                                                                        ),
+                                                                      ),
+                                                                      Gap(lsize.maxHeight * 0.01),
+                                                                      Text(
+                                                                        'Utilized',
+                                                                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  width: lsize.maxWidth * 0.25,
+                                                                  padding: EdgeInsets.all(lsize.maxHeight * 0.02),
+                                                                  margin: EdgeInsets.only(left: lsize.maxWidth * 0.02),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: BorderRadius.circular(15), color: const Color.fromRGBO(95, 43, 147, 1)),
+                                                                  child: Column(
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    children: [
+                                                                      Text(
+                                                                        '15', // the number part
+                                                                        style: TextStyle(
+                                                                          fontSize: 16, // Bigger font size
+                                                                          color: Colors.white, // White color
+                                                                          fontWeight: FontWeight.bold,
+                                                                        ),
+                                                                      ),
+                                                                      Gap(lsize.maxHeight * 0.01),
+                                                                      Text(
+                                                                        'Free',
+                                                                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                if (days > 15)
+                                                                  Container(
+                                                                    width: lsize.maxWidth * 0.25,
+                                                                    padding: EdgeInsets.all(lsize.maxHeight * 0.02),
+                                                                    margin: EdgeInsets.only(left: lsize.maxWidth * 0.02),
+                                                                    decoration: BoxDecoration(
+                                                                        borderRadius: BorderRadius.circular(15), color: const Color.fromRGBO(95, 43, 147, 1)),
+                                                                    child: Column(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        Text(
+                                                                          (days - 15).toString(), // the number part
+                                                                          style: TextStyle(
+                                                                            fontSize: 16, // Bigger font size
+                                                                            color: Colors.white, // White color
+                                                                            fontWeight: FontWeight.bold,
+                                                                          ),
+                                                                        ),
+                                                                        Gap(lsize.maxHeight * 0.01),
+                                                                        Text(
+                                                                          'Detention',
+                                                                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                if (days > 15)
+                                                                  Container(
+                                                                    width: lsize.maxWidth * 0.25,
+                                                                    padding: EdgeInsets.all(lsize.maxHeight * 0.02),
+                                                                    margin: EdgeInsets.only(left: lsize.maxWidth * 0.02),
+                                                                    decoration: BoxDecoration(
+                                                                        borderRadius: BorderRadius.circular(15), color: const Color.fromRGBO(95, 43, 147, 1)),
+                                                                    child: Column(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        Text(
+                                                                          '${(days - 15) * 2000}', // the number part
+                                                                          style: TextStyle(
+                                                                            fontSize: 16, // Bigger font size
+                                                                            color: Colors.white, // White color
+                                                                            fontWeight: FontWeight.bold,
+                                                                          ),
+                                                                        ),
+                                                                        Gap(lsize.maxHeight * 0.01),
+                                                                        Text(
+                                                                          'Cost',
+                                                                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Transform.rotate(
+                                                        angle: -math.pi / 1.3,
+                                                        child: Image.asset(
+                                                          'assets/images/left_arrow.png',
+                                                          scale: lsize.maxHeight * 0.04,
+                                                          color: const Color.fromARGB(255, 229, 229, 229),
+                                                        ),
+                                                      ),
+                                                      Gap(lsize.maxWidth * 0.03),
+                                                      Text(
+                                                        DateFormat('dd MMM, hh:mm a').format(container.arrivalTime!),
+                                                        style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Transform.rotate(
+                                                        angle: math.pi / 1.3,
+                                                        child: Image.asset(
+                                                          'assets/images/left_arrow.png',
+                                                          scale: lsize.maxHeight * 0.04,
+                                                          color: const Color.fromARGB(255, 229, 229, 229),
+                                                        ),
+                                                      ),
+                                                      Gap(lsize.maxWidth * 0.03),
+                                                      Text(
+                                                        DateFormat('dd MMM, hh:mm a').format(container.expectedEndTime!),
+                                                        style: const TextStyle(color: Color.fromARGB(255, 229, 229, 229), fontSize: 13),
+                                                      ),
+                                                    ],
+                                                  )
                                                 ],
                                               )
                                             ],
-                                          )
-                                        ],
-                                      );
-                                    }),
+                                          );
+                                        }),
+                                      ),
+                                      if (days > 15) Customs.DetentionIndicator(size: size)
+                                    ],
                                   );
                                 },
                                 dropDownBuilder: (index) {
@@ -400,16 +539,16 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                         child: InkWell(
                                           onTap: () {
                                             _containerInteractionBloc.state.webViewController!
-                                                .evaluateJavascript(source: 'goToContainer("${container.containerNbr}","${container.lotNo}");');
+                                                .evaluateJavascript(source: 'goToContainer("${container.shipmentNbr}","${container.lotNo}");');
                                           },
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.064, bottom: lsize.maxHeight * 0.007),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.092, bottom: lsize.maxHeight * 0.007),
                                             decoration: const BoxDecoration(
-                                              color: Color.fromARGB(255, 89, 201, 147),
+                                              color: Color.fromRGBO(142, 84, 199, 1),
                                               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15)),
                                             ),
-                                            child: Image.asset('assets/images/locate.png', color: const Color.fromARGB(255, 10, 114, 64)),
+                                            child: Image.asset('assets/images/locate.png', color: Colors.white70),
                                           ),
                                         ),
                                       ),
@@ -429,34 +568,32 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           },
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.064, bottom: lsize.maxHeight * 0.007),
-                                            decoration: const BoxDecoration(color: Color.fromARGB(255, 102, 102, 213)),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.09, bottom: lsize.maxHeight * 0.007),
+                                            decoration: const BoxDecoration(
+                                                color: Color.fromRGBO(142, 84, 199, 1),
+                                                border: Border(
+                                                    left: BorderSide(color: Color.fromARGB(255, 229, 229, 229)),
+                                                    right: BorderSide(color: Color.fromARGB(255, 229, 229, 229)))),
                                             child: Image.asset(
                                               'assets/images/${widget.area == 'UNASSIGNED' ? 'allocate' : 'relocate'}.png',
-                                              color: const Color.fromARGB(255, 13, 13, 116),
+                                              color: Colors.white70,
                                             ),
                                           ),
                                         ),
                                       ),
                                       Expanded(
                                         child: InkWell(
-                                          onTap: () {
-                                            Customs.DeleteContainerDialog(
-                                                context: context,
-                                                containerNbr: container.containerNbr!,
-                                                area: _containerInteractionBloc.state.selectedAreaName!.name,
-                                                pageController: pageController);
-                                          },
+                                          onTap: () {},
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.064, bottom: lsize.maxHeight * 0.007),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.09, bottom: lsize.maxHeight * 0.007),
                                             decoration: const BoxDecoration(
-                                              color: Color.fromARGB(255, 216, 97, 97),
+                                              color: Color.fromRGBO(142, 84, 199, 1),
                                               borderRadius: BorderRadius.only(bottomRight: Radius.circular(15)),
                                             ),
                                             child: Image.asset(
-                                              'assets/images/delete.png',
-                                              color: const Color.fromARGB(255, 118, 14, 14),
+                                              'assets/images/cycle_count.png',
+                                              color: Colors.white70,
                                             ),
                                           ),
                                         ),
@@ -611,7 +748,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                       onPressed: () {
                                         if (_containerInteractionBloc.state.selectedDropdownLot != null) {
                                           _containerInteractionBloc.add(RelocateContainer(
-                                            containerNbr: state.customers![customerIndex].containers![containerIndex].containerNbr!,
+                                            containerNbr: state.customers![customerIndex].containers![containerIndex].shipmentNbr!,
                                             lotNo: _containerInteractionBloc.state.selectedDropdownLot!.toUpperCase(),
                                             targetArea:
                                                 widget.area == 'UNASSIGNED' ? state.customers![customerIndex].containers![containerIndex].toArea! : widget.area,

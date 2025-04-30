@@ -24,8 +24,6 @@ class Customs {
       width: size.width * 0.22,
       alignment: Alignment.center,
       decoration: const BoxDecoration(
-          // color: Color.fromRGBO(54, 24, 110, 1),
-          // color: Color.fromRGBO(198, 142, 253, 1),
           color: Color.fromRGBO(242, 228, 255, 1),
           borderRadius: BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
           boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 10, spreadRadius: 5, offset: Offset(0, 8))]),
@@ -37,22 +35,21 @@ class Customs {
               height: size.height * 0.065,
               width: double.infinity,
               decoration: BoxDecoration(
-                // color: Color.fromRGBO(82, 39, 155, 1),
-                color: Color.fromRGBO(164, 111, 218, 1),
+                color: const Color.fromRGBO(121, 65, 177, 1),
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [BoxShadow(color: Colors.black, blurRadius: 1.5, spreadRadius: 0.5)],
-                border: Border.all(
-                    // color: Color.fromRGBO(117, 72, 195, 1)
-                    width: 1.5,
-                    color: Color.fromRGBO(111, 54, 167, 1)),
+                boxShadow: [const BoxShadow(color: Colors.black, blurRadius: 1.5, spreadRadius: 0.5)],
+                border: Border.all(width: 1.5, color: const Color.fromARGB(255, 96, 46, 147)),
               ),
               child: Row(
                 children: [
                   InkWell(
                       onTap: onExit,
-                      child: const Icon(
-                        Icons.keyboard_arrow_right_rounded,
-                        color: Color.fromRGBO(111, 54, 167, 1),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.keyboard_arrow_left_rounded,
+                          color: Colors.white,
+                        ),
                       )),
                   Expanded(
                     child: Transform.translate(
@@ -60,7 +57,7 @@ class Customs {
                       child: Text(
                         title,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Color.fromRGBO(111, 54, 167, 1), fontSize: size.width * 0.012, letterSpacing: 1.6, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontSize: size.width * 0.012, letterSpacing: 1.6, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -79,7 +76,7 @@ class Customs {
     return Container(
       height: size.height * 0.2,
       width: double.infinity,
-      decoration: BoxDecoration(color: Color.fromRGBO(191, 208, 228, 1), borderRadius: BorderRadius.circular(15)),
+      decoration: BoxDecoration(color: const Color.fromRGBO(191, 208, 228, 1), borderRadius: BorderRadius.circular(15)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -240,7 +237,7 @@ class Customs {
                             Container(
                               width: parent.maxWidth * 0.33,
                               alignment: Alignment.centerRight,
-                              padding: EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.only(right: 8),
                               child: IconButton(
                                   onPressed: () {
                                     Navigator.pop(context);
@@ -264,55 +261,55 @@ class Customs {
                                 children: [
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 120, 154, 95),
+                                      iconBgColor: const Color.fromARGB(255, 120, 154, 95),
                                       contentValue: state.workQueueData != null ? state.workQueueData!.ordersAwaitingReceiving.toString() : " null value",
                                       imagePath: "assets/images/orders_awaiting_receiving.png",
                                       heading: "Orders Awaiting Receiving"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 236, 178, 102),
+                                      iconBgColor: const Color.fromARGB(255, 236, 178, 102),
                                       contentValue: state.workQueueData!.ordersAwaitingFulfilment.toString(),
                                       imagePath: "assets/images/order_awaiting_fulfilment.png",
                                       heading: "Orders Awaiting Fulfilment"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 10, 162, 222),
+                                      iconBgColor: const Color.fromARGB(255, 10, 162, 222),
                                       contentValue: state.workQueueData!.openPickingTask.toString(),
                                       imagePath: "assets/images/open_picking_tasks.png",
                                       heading: "Open Picking Task"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 120, 154, 95),
+                                      iconBgColor: const Color.fromARGB(255, 120, 154, 95),
                                       contentValue: state.workQueueData!.pendingAsn.toString(),
                                       imagePath: "assets/images/asn_awaiting_receipt.png",
                                       heading: "ASNs Awaiting Receipt"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 236, 178, 102),
+                                      iconBgColor: const Color.fromARGB(255, 236, 178, 102),
                                       contentValue: state.workQueueData!.loadingQueue.toString(),
                                       imagePath: "assets/images/loading_queue.png",
                                       heading: "Loading Queue"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 10, 162, 222),
+                                      iconBgColor: const Color.fromARGB(255, 10, 162, 222),
                                       contentValue: state.workQueueData!.pendingCycleCounts.toString(),
                                       imagePath: "assets/images/cycle_count.png",
                                       heading: "Pending Cycle Counts"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 120, 154, 95),
+                                      iconBgColor: const Color.fromARGB(255, 120, 154, 95),
                                       contentValue: state.workQueueData!.pendingPutaways.toString(),
                                       imagePath: "assets/images/pending_putaway.png",
                                       heading: "Pending Putaways"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 236, 178, 102),
+                                      iconBgColor: const Color.fromARGB(255, 236, 178, 102),
                                       contentValue: state.workQueueData!.ordersToBeShipped.toString(),
                                       imagePath: "assets/images/orders_to_be_shipped.png",
                                       heading: "Orders To Be Shipped"),
                                   PendingDialogChildContianer(
                                       parent: parent,
-                                      iconBgColor: Color.fromARGB(255, 10, 162, 222),
+                                      iconBgColor: const Color.fromARGB(255, 10, 162, 222),
                                       contentValue: state.workQueueData!.openWorkOrders.toString(),
                                       imagePath: "assets/images/open_work_orders.png",
                                       heading: "Open Work Orders"),
@@ -342,9 +339,9 @@ class Customs {
                                       if (states.contains(WidgetState.hovered)) {
                                         return Colors.white;
                                       }
-                                      return Color.fromRGBO(68, 98, 136, 1);
+                                      return const Color.fromRGBO(68, 98, 136, 1);
                                     })),
-                                child: Text(
+                                child: const Text(
                                   "Take Action",
                                   style: TextStyle(),
                                 )),
@@ -596,7 +593,7 @@ class Customs {
                             Expanded(
                               child: Text(
                                 "Are you sure you want to delete the container with Container Nbr $containerNbr ?",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
                             Gap(size.height * 0.01),
@@ -604,7 +601,7 @@ class Customs {
                                 onPressed: () {
                                   // containerInteractionBloc.add(DeleteContainer(area: area, containerNbr: containerNbr));
                                   if (areaBloc.state.customers![areaBloc.state.selectedCustomerIndex!].containers!.length == 1) {
-                                    pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.linear);
+                                    pageController.animateToPage(0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                                     areaBloc.state.customers!.removeAt(areaBloc.state.selectedCustomerIndex!);
                                   } else {
                                     print('delete initiated');
@@ -848,6 +845,17 @@ class Customs {
       boxShadows: [BoxShadow(blurRadius: 12, blurStyle: BlurStyle.outer, spreadRadius: 0, color: Colors.blue.shade900, offset: const Offset(0, 0))],
     ).show(context);
   }
+
+  static Widget DetentionIndicator({required Size size}) {
+    return ClipPath(
+      clipper: DetentionIndicatorClipper(),
+      child: Container(
+        height: size.width * 0.033,
+        width: size.width * 0.033,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: const Color.fromARGB(255, 216, 97, 97)),
+      ),
+    );
+  }
 }
 
 String? containerNbrValidator(String value) {
@@ -901,4 +909,21 @@ extension StringExtensions on String {
             (word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}' : '') // Capitalize the first letter and lowercase the rest
         .join(' '); // Join the words back with spaces
   }
+}
+
+class DetentionIndicatorClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+
+    double x = size.width;
+    double y = size.height;
+    path.lineTo(0, y * 0.9);
+    path.quadraticBezierTo(x * 0.2, y * 0.2, x * 0.9, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => oldClipper != this;
 }

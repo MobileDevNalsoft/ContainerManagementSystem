@@ -109,41 +109,39 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                           },
                           buildWhen: (previous, current) => previous.sentDataToJS != current.sentDataToJS,
                           builder: (context, state) {
-                            return
-                                // AnimatedBuilder(
-                                //     animation: widthAnimation,
-                                //     builder: (context, child) {
-                                //       return SizedBox(
-                                //         height: size.height * 0.92,
-                                //         width: size.width * widthAnimation.value,
-                                //         child: InAppWebView(
-                                //           initialFile: 'assets/web_pro/index.html',
-                                //           onWebViewCreated: (controller) async {
-                                //             _containerInteractionBloc.state.webViewController = controller;
-                                //           },
-                                //           onConsoleMessage: (controller, consoleMessage) {
-                                //             if (consoleMessage.messageLevel.toNativeValue() == 1 && consoleMessage.message.contains('{"')) {
-                                //               Map<String, dynamic> message = jsonDecode(consoleMessage.message);
-                                //               jsToFlutter(message);
-                                //             }
-                                //           },
-                                //           onLoadStop: (controller, url) async {
-                                //             _containerInteractionBloc.add(WebLoaded(loaded: true));
-                                //             _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'storeLotsDataFromLocal();');
-                                //             await controller.webStorage.localStorage.getItem(key: 'area_lots_data').then(
-                                //               (value) {
-                                //                 _containerInteractionBloc.state.lotsData = value;
-                                //                 print(_containerInteractionBloc.state.lotsData);
-                                //               },
-                                //             );
-                                //           },
-                                //         ),
-                                //       );
-                                //     });
-                                // :
-                                const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                            return AnimatedBuilder(
+                                animation: widthAnimation,
+                                builder: (context, child) {
+                                  return SizedBox(
+                                    height: size.height * 0.92,
+                                    width: size.width * widthAnimation.value,
+                                    child: InAppWebView(
+                                      initialFile: 'assets/web_pro/index.html',
+                                      onWebViewCreated: (controller) async {
+                                        _containerInteractionBloc.state.webViewController = controller;
+                                      },
+                                      onConsoleMessage: (controller, consoleMessage) {
+                                        if (consoleMessage.messageLevel.toNativeValue() == 1 && consoleMessage.message.contains('{"')) {
+                                          Map<String, dynamic> message = jsonDecode(consoleMessage.message);
+                                          jsToFlutter(message);
+                                        }
+                                      },
+                                      onLoadStop: (controller, url) async {
+                                        _containerInteractionBloc.add(WebLoaded(loaded: true));
+                                        _containerInteractionBloc.state.webViewController!.evaluateJavascript(source: 'storeLotsDataFromLocal();');
+                                        await controller.webStorage.localStorage.getItem(key: 'area_lots_data').then(
+                                          (value) {
+                                            _containerInteractionBloc.state.lotsData = value;
+                                            print(_containerInteractionBloc.state.lotsData);
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  );
+                                });
+                            // : const Center(
+                            //     child: CircularProgressIndicator(),
+                            //   );
                           },
                         ),
                       ),
@@ -165,59 +163,59 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                           builder: (context, child) {
                             return Positioned(
                               right: positionAnimation.value,
-                              child: PointerInterceptor(child: AreaDataSheet(area: 'UNASSIGNED', key: ValueKey('UNASSIGNED'))
-                                  // getDataSheetFor(context.watch<ContainerInteractionBloc>().state.dataFromJS!.keys.first,
-                                  //         context.watch<ContainerInteractionBloc>().state.dataFromJS!.values.first.toString()) ??
-                                  //     const SizedBox(),
-                                  ),
+                              child: PointerInterceptor(
+                                child: getDataSheetFor(context.watch<ContainerInteractionBloc>().state.dataFromJS!.keys.first,
+                                        context.watch<ContainerInteractionBloc>().state.dataFromJS!.values.first.toString()) ??
+                                    const SizedBox(),
+                              ),
                             );
                           }),
-                      // if (context.watch<ContainerInteractionBloc>().state.modelLoaded! == false)
-                      //   Align(
-                      //     alignment: Alignment.bottomCenter,
-                      //     child: Container(
-                      //       height: size.height * 0.92,
-                      //       width: size.width,
-                      //       alignment: Alignment.center,
-                      //       decoration: const BoxDecoration(color: Color.fromRGBO(242, 228, 255, 1)),
-                      //       child: SpinKitCubeGrid(
-                      //         color: Color.fromRGBO(121, 65, 177, 1),
-                      //         size: size.height * 0.15,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // if (context.watch<ContainerInteractionBloc>().state.modelLoaded == true)
-                      //   Positioned(
-                      //       left: 0,
-                      //       bottom: 16,
-                      //       child: PointerInterceptor(
-                      //           child: Container(
-                      //         height: size.height * 0.064,
-                      //         width: size.width * 0.03,
-                      //         decoration: const BoxDecoration(
-                      //             borderRadius: BorderRadius.only(topRight: Radius.circular(16), bottomRight: Radius.circular(16)),
-                      //             color: Color.fromRGBO(121, 65, 177, 1)),
-                      //         child: IconButton(
-                      //             onPressed: () {
-                      //               context.read<WorkQueueBloc>().add(const GetWorkQueueData());
-                      //               Customs.PendigDialog(context: context);
-                      //             },
-                      //             icon: const Icon(
-                      //               Icons.arrow_right_alt_rounded,
-                      //               color: Colors.white,
-                      //             )),
-                      //       )))
+                      if (context.watch<ContainerInteractionBloc>().state.modelLoaded! == false)
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            height: size.height * 0.92,
+                            width: size.width,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(color: Color.fromRGBO(242, 228, 255, 1)),
+                            child: SpinKitCubeGrid(
+                              color: Color.fromRGBO(121, 65, 177, 1),
+                              size: size.height * 0.15,
+                            ),
+                          ),
+                        ),
+                      if (context.watch<ContainerInteractionBloc>().state.modelLoaded == true)
+                        Positioned(
+                            left: 0,
+                            bottom: 16,
+                            child: PointerInterceptor(
+                                child: Container(
+                              height: size.height * 0.064,
+                              width: size.width * 0.03,
+                              decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.only(topRight: Radius.circular(16), bottomRight: Radius.circular(16)),
+                                  color: Color.fromRGBO(121, 65, 177, 1)),
+                              child: IconButton(
+                                  onPressed: () {
+                                    context.read<WorkQueueBloc>().add(const GetWorkQueueData());
+                                    Customs.PendigDialog(context: context);
+                                  },
+                                  icon: const Icon(
+                                    Icons.arrow_right_alt_rounded,
+                                    color: Colors.white,
+                                  )),
+                            )))
                     ],
                   ),
                 ],
               ),
               Positioned(left: size.width * 0.15, top: size.height * 0.013, child: PointerInterceptor(child: SearchBarDropdown(size: size))),
-              // if (context.watch<ContainerInteractionBloc>().state.getAddContainerStatus == AddContainerStatus.loading)
-              //   Center(
-              //     child: SpinKitFadingCube(
-              //       color: Colors.white,
-              //     ),
-              //   )
+              if (context.watch<ContainerInteractionBloc>().state.getAddContainerStatus == AddContainerStatus.loading)
+                Center(
+                  child: SpinKitFadingCube(
+                    color: Colors.white,
+                  ),
+                )
             ],
           )),
     );
