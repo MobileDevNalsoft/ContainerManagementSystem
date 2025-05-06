@@ -43,4 +43,5 @@ class AppConstants {
   static const GET_AREA_DATA = 'getAreaData';
   static const SEARCH_CONTAINER = 'search_container';
   static const GET_AVAILABLE_LOTS = 'getAvailableLots';
+  static const GET_SUMMARY = 'get_summary';
 }

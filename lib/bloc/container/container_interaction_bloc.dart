@@ -12,6 +12,7 @@ import 'package:warehouse_3d/logger/logger.dart';
 import 'package:warehouse_3d/models/area_model.dart';
 import 'package:warehouse_3d/models/areas_model.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:warehouse_3d/models/summary_model.dart';
 
 part 'container_interaction_event.dart';
 part 'container_interaction_state.dart';
@@ -37,6 +38,8 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
     on<SelectedArea>(_onSelectedArea);
     on<DropdownAreaChanged>(_onDropdownAreaChanged);
     on<DropdownLotChanged>(_onDropdownLotChanged);
+    on<LotsToggled>(_onLotsToggled);
+    on<GetSummary>(_onGetSummary);
   }
 
   Future<void> _cacheLotsData(Map<String, dynamic> data) async {
@@ -131,6 +134,29 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
     }
   }
 
+  Future<void> _onGetSummary(GetSummary event, Emitter<ContainerInteractionState> emit) async {
+    emit(state.copyWith(getSummaryStatus: SummaryStatus.loading));
+
+    try {
+      await _networkCalls.get(AppConstants.GET_SUMMARY).then(
+        (apiResponse) {
+          Map<String, dynamic> data = jsonDecode(apiResponse.response!.data!);
+          print(data);
+          if (data['response_code'] == 200) {
+            emit(state.copyWith(getSummaryStatus: SummaryStatus.success, summary: Summary.fromJson(data['data'])));
+            print('total lots ${state.summary!.yard!.totalLots}');
+          } else {
+            print(data['response_message']);
+            Error();
+          }
+        },
+      );
+    } catch (e) {
+      Log.e(e.toString());
+      emit(state.copyWith(getSummaryStatus: SummaryStatus.failure));
+    }
+  }
+
   Future<void> _onDeleteContainer(DeleteContainer event, Emitter<ContainerInteractionState> emit) async {
     emit(state.copyWith(getAddContainerStatus: AddContainerStatus.loading));
 
@@ -178,5 +204,9 @@ class ContainerInteractionBloc extends Bloc<ContainerInteractionEvent, Container
 
   void _onDropdownLotChanged(DropdownLotChanged event, Emitter<ContainerInteractionState> emit) {
     emit(state.copyWith(selectedDropdownLot: event.lotNo));
+  }
+
+  void _onLotsToggled(LotsToggled event, Emitter<ContainerInteractionState> emit) {
+    emit(state.copyWith(lotsToggled: event.toggled));
   }
 }

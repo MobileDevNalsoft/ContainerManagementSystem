@@ -1,5 +1,14 @@
 part of 'container_interaction_bloc.dart';
 
+class LotsToggled extends ContainerInteractionEvent {
+  final bool toggled;
+
+  LotsToggled({required this.toggled});
+
+  @override
+  List<Object> get props => [toggled];
+}
+
 abstract class ContainerInteractionEvent extends Equatable {
   @override
   List<Object> get props => [];
@@ -95,3 +104,5 @@ class DropdownLotChanged extends ContainerInteractionEvent {
 
   DropdownLotChanged({this.lotNo});
 }
+
+class GetSummary extends ContainerInteractionEvent {}

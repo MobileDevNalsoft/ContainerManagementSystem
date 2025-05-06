@@ -6,7 +6,6 @@ import 'package:lottie/lottie.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
 import 'package:warehouse_3d/bloc/area/area_bloc.dart';
-import 'package:warehouse_3d/bloc/work_queue/work_queue_bloc.dart';
 import 'package:warehouse_3d/pages/customs/customs.dart';
 import 'package:warehouse_3d/pages/customs/searchbar_dropdown.dart';
 import 'package:warehouse_3d/pages/data_sheets/area_data_sheet.dart';
@@ -98,14 +97,6 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                               state.webViewController!.evaluateJavascript(source: "storeLotsData('${jsonEncode(_containerInteractionBloc.state.lotsData)}');");
                               state.webViewController!.evaluateJavascript(source: "setCustomer('Sravan');");
                             }
-
-                            if (state.webLoaded! &&
-                                context.read<WorkQueueBloc>().state.workQueueShownInitially != null &&
-                                !context.read<WorkQueueBloc>().state.workQueueShownInitially!) {
-                              // context.read<WorkQueueBloc>().add(const GetWorkQueueData());
-                              // Customs.PendigDialog(context: context);
-                              // context.read<WorkQueueBloc>().state.workQueueShownInitially = true;
-                            }
                           },
                           buildWhen: (previous, current) => previous.sentDataToJS != current.sentDataToJS,
                           builder: (context, state) {
@@ -139,9 +130,6 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                                     ),
                                   );
                                 });
-                            // : const Center(
-                            //     child: CircularProgressIndicator(),
-                            //   );
                           },
                         ),
                       ),
@@ -197,8 +185,8 @@ class _ContainerYard3DViewState extends State<ContainerYard3DView> with TickerPr
                                   color: Color.fromRGBO(121, 65, 177, 1)),
                               child: IconButton(
                                   onPressed: () {
-                                    context.read<WorkQueueBloc>().add(const GetWorkQueueData());
-                                    Customs.PendigDialog(context: context);
+                                    _containerInteractionBloc.add(GetSummary());
+                                    Customs.SummaryDialog(context: context);
                                   },
                                   icon: const Icon(
                                     Icons.arrow_right_alt_rounded,

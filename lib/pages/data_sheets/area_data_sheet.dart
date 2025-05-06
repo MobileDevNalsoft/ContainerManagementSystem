@@ -543,7 +543,7 @@ class _AreaDataSheetState extends State<AreaDataSheet> {
                                           },
                                           child: Container(
                                             height: double.infinity,
-                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.092, bottom: lsize.maxHeight * 0.007),
+                                            padding: EdgeInsets.only(top: lsize.maxHeight * 0.09, bottom: lsize.maxHeight * 0.007),
                                             decoration: const BoxDecoration(
                                               color: Color.fromRGBO(142, 84, 199, 1),
                                               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15)),

@@ -11,9 +11,11 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:warehouse_3d/bloc/area/area_bloc.dart';
 import 'package:warehouse_3d/bloc/container/container_interaction_bloc.dart';
-import 'package:warehouse_3d/bloc/work_queue/work_queue_bloc.dart';
 import 'package:warehouse_3d/models/areas_model.dart';
+import 'package:warehouse_3d/models/summary_model.dart';
+import 'package:warehouse_3d/pages/customs/animated_toggle.dart';
 import 'package:warehouse_3d/utils/url_navigator.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Customs {
   static Widget DataSheet(
@@ -37,7 +39,7 @@ class Customs {
               decoration: BoxDecoration(
                 color: const Color.fromRGBO(121, 65, 177, 1),
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [const BoxShadow(color: Colors.black, blurRadius: 1.5, spreadRadius: 0.5)],
+                boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 1.5, spreadRadius: 0.5)],
                 border: Border.all(width: 1.5, color: const Color.fromARGB(255, 96, 46, 147)),
               ),
               child: Row(
@@ -188,7 +190,44 @@ class Customs {
     );
   }
 
-  static void PendigDialog({required BuildContext context, Widget? content}) {
+  static Widget CMSSfCircularChart(
+      {required BoxConstraints lsize,
+      String title = 'Title',
+      double titleFontSize = 16,
+      Props? props,
+      bool legendVisibility = false,
+      String? Function(PieData datum, int index)? dataLabelMapper}) {
+    return SfCircularChart(
+      title: ChartTitle(text: title, textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: titleFontSize)),
+      legend: Legend(
+        isVisible: legendVisibility,
+        alignment: ChartAlignment.center,
+        position: LegendPosition.right,
+        textStyle: TextStyle(fontSize: 10),
+      ),
+      margin: EdgeInsets.only(left: lsize.maxWidth * 0.02),
+      series: <CircularSeries>[
+        PieSeries<PieData, String>(
+          dataSource: props!.dataSource,
+          dataLabelMapper: dataLabelMapper,
+          strokeColor: Colors.black,
+          strokeWidth: 0.2,
+          dataLabelSettings: DataLabelSettings(
+              // Renders the data label
+              isVisible: true,
+              textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: props.labelFontSize, color: Colors.black),
+              alignment: ChartAlignment.center),
+          radius: '${lsize.maxWidth * 0.12}%',
+          pointColorMapper: props.pointColorMapper,
+          onPointTap: props.onPointTap,
+          xValueMapper: (PieData data, _) => data.xData,
+          yValueMapper: (PieData data, _) => data.yData,
+        )
+      ],
+    );
+  }
+
+  static void SummaryDialog({required BuildContext context, Widget? content}) {
     Size size = MediaQuery.of(context).size;
     showGeneralDialog(
       context: context,
@@ -209,11 +248,11 @@ class Customs {
       pageBuilder: (context, animation, secondaryAnimation) {
         return StatefulBuilder(builder: (context, state) {
           return PointerInterceptor(
-            child: BlocBuilder<WorkQueueBloc, WorkQueueState>(builder: (context, state) {
-              print("state change ${state.workQueueStatus}");
+            child: BlocBuilder<ContainerInteractionBloc, ContainerInteractionState>(builder: (context, state) {
+              bool isEnabled = state.getSummaryStatus != SummaryStatus.success;
               return Container(
-                  height: size.height * 0.6,
-                  width: size.width * 0.54,
+                  height: size.height * 0.8,
+                  width: size.width * 0.6,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     color: const Color(0xFFF2F2F2),
@@ -221,132 +260,85 @@ class Customs {
                   child: LayoutBuilder(builder: (context, parent) {
                     return Column(
                       children: [
-                        Gap(parent.maxHeight * 0.024),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Gap(parent.maxHeight * 0.02),
+                        Stack(
                           children: [
-                            Gap(parent.maxWidth * 0.33),
-                            SizedBox(
-                              width: parent.maxWidth * 0.33,
+                            Align(
+                              alignment: Alignment.center,
                               child: Text(
-                                "Containers Work Queue",
+                                "ICD Summary",
                                 style: TextStyle(fontSize: size.height * 0.032, color: Colors.black, decoration: TextDecoration.none, letterSpacing: 0.4),
-                                textAlign: TextAlign.center,
                               ),
                             ),
-                            Container(
-                              width: parent.maxWidth * 0.33,
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 8),
-                              child: IconButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: Icon(
-                                    Icons.close_rounded,
-                                    size: size.height * 0.032,
-                                  )),
+                            Positioned(
+                              right: size.width * 0.1,
+                              child: AnimatedToggleButton(
+                                height: size.height * 0.05,
+                                width: size.width * 0.075,
+                                toggleColor: const Color.fromRGBO(121, 65, 177, 1),
+                                onToggle: (value) {
+                                  context.read<ContainerInteractionBloc>().add(LotsToggled(toggled: value));
+                                },
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding: EdgeInsets.only(right: size.width * 0.006),
+                                child: IconButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    icon: Icon(
+                                      Icons.close_rounded,
+                                      size: size.height * 0.032,
+                                    )),
+                              ),
                             )
                           ],
                         ),
-                        Gap(parent.maxHeight * 0.048),
-                        Skeletonizer(
-                          enabled: state.workQueueStatus == WorkQueueStatus.loading,
+                        Expanded(
                           child: Align(
                             alignment: Alignment.center,
-                            child: Wrap(
-                                spacing: parent.maxWidth * 0.02,
-                                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                runSpacing: parent.maxWidth * 0.02,
-                                children: [
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 120, 154, 95),
-                                      contentValue: state.workQueueData != null ? state.workQueueData!.ordersAwaitingReceiving.toString() : " null value",
-                                      imagePath: "assets/images/orders_awaiting_receiving.png",
-                                      heading: "Orders Awaiting Receiving"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 236, 178, 102),
-                                      contentValue: state.workQueueData!.ordersAwaitingFulfilment.toString(),
-                                      imagePath: "assets/images/order_awaiting_fulfilment.png",
-                                      heading: "Orders Awaiting Fulfilment"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 10, 162, 222),
-                                      contentValue: state.workQueueData!.openPickingTask.toString(),
-                                      imagePath: "assets/images/open_picking_tasks.png",
-                                      heading: "Open Picking Task"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 120, 154, 95),
-                                      contentValue: state.workQueueData!.pendingAsn.toString(),
-                                      imagePath: "assets/images/asn_awaiting_receipt.png",
-                                      heading: "ASNs Awaiting Receipt"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 236, 178, 102),
-                                      contentValue: state.workQueueData!.loadingQueue.toString(),
-                                      imagePath: "assets/images/loading_queue.png",
-                                      heading: "Loading Queue"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 10, 162, 222),
-                                      contentValue: state.workQueueData!.pendingCycleCounts.toString(),
-                                      imagePath: "assets/images/cycle_count.png",
-                                      heading: "Pending Cycle Counts"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 120, 154, 95),
-                                      contentValue: state.workQueueData!.pendingPutaways.toString(),
-                                      imagePath: "assets/images/pending_putaway.png",
-                                      heading: "Pending Putaways"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 236, 178, 102),
-                                      contentValue: state.workQueueData!.ordersToBeShipped.toString(),
-                                      imagePath: "assets/images/orders_to_be_shipped.png",
-                                      heading: "Orders To Be Shipped"),
-                                  PendingDialogChildContianer(
-                                      parent: parent,
-                                      iconBgColor: const Color.fromARGB(255, 10, 162, 222),
-                                      contentValue: state.workQueueData!.openWorkOrders.toString(),
-                                      imagePath: "assets/images/open_work_orders.png",
-                                      heading: "Open Work Orders"),
-                                ]),
+                            child: Wrap(alignment: WrapAlignment.center, spacing: parent.maxWidth * 0.03, runSpacing: parent.maxWidth * 0.03, children: [
+                              PendingDialogChildContianer(
+                                  parent: parent,
+                                  heading: "Yard",
+                                  colors: [const Color.fromARGB(255, 163, 221, 210), Color.fromRGBO(87, 163, 145, 1)],
+                                  lots: state.lotsToggled!,
+                                  isEnabled: isEnabled,
+                                  areaSummary: state.summary?.yard),
+                              PendingDialogChildContianer(
+                                  parent: parent,
+                                  heading: "Refrigerated",
+                                  colors: [const Color.fromRGBO(193, 194, 234, 41), Color.fromRGBO(129, 130, 182, 1)],
+                                  lots: state.lotsToggled!,
+                                  isEnabled: isEnabled,
+                                  areaSummary: state.summary?.refrigerated),
+                              PendingDialogChildContianer(
+                                  parent: parent,
+                                  heading: "Dry",
+                                  colors: [const Color.fromARGB(255, 158, 212, 223), Color.fromRGBO(75, 160, 176, 1)],
+                                  lots: state.lotsToggled!,
+                                  isEnabled: isEnabled,
+                                  areaSummary: state.summary?.dry),
+                              PendingDialogChildContianer(
+                                  parent: parent,
+                                  heading: "Empty",
+                                  colors: [const Color.fromARGB(255, 161, 215, 244), Color.fromRGBO(76, 144, 181, 1)],
+                                  lots: state.lotsToggled!,
+                                  isEnabled: isEnabled,
+                                  areaSummary: state.summary?.empty),
+                              PendingDialogChildContianer(
+                                  parent: parent,
+                                  heading: "Damaged",
+                                  colors: [const Color.fromRGBO(220, 163, 214, 41), Color.fromRGBO(184, 116, 176, 1)],
+                                  lots: state.lotsToggled!,
+                                  isEnabled: isEnabled,
+                                  areaSummary: state.summary?.damaged),
+                            ]),
                           ),
                         ),
-                        Gap(parent.maxHeight * 0.032),
-                        Padding(
-                          padding: EdgeInsets.only(right: parent.maxHeight * 0.04),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  UrlNavigator().launchOrFocusUrl('https://tg1.wms.ocs.oraclecloud.com/emg_test/index/');
-                                  Navigator.pop(context);
-                                },
-                                style: ButtonStyle(
-                                    minimumSize: WidgetStatePropertyAll(Size(parent.maxWidth * 0.064, parent.maxHeight * 0.088)), // Set the desired size
-
-                                    foregroundColor: WidgetStateColor.resolveWith((state) {
-                                      if (state.contains(WidgetState.hovered)) {
-                                        return Colors.black;
-                                      }
-                                      return Colors.white;
-                                    }),
-                                    backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
-                                      if (states.contains(WidgetState.hovered)) {
-                                        return Colors.white;
-                                      }
-                                      return const Color.fromRGBO(68, 98, 136, 1);
-                                    })),
-                                child: const Text(
-                                  "Take Action",
-                                  style: TextStyle(),
-                                )),
-                          ),
-                        )
                       ],
                     );
                   }));
@@ -358,62 +350,65 @@ class Customs {
   }
 
   static Widget PendingDialogChildContianer(
-      {required BoxConstraints parent, String? imagePath, Color? iconBgColor, String? contentValue, required String heading}) {
+      {required BoxConstraints parent,
+      required String heading,
+      required List<Color> colors,
+      bool lots = true,
+      bool isEnabled = true,
+      AreaSummary? areaSummary}) {
     return Container(
       alignment: Alignment.center,
-      height: parent.maxHeight * 0.21,
+      height: parent.maxHeight * 0.4,
       width: parent.maxWidth * 0.3,
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.blue.shade900, spreadRadius: 2, blurRadius: 2, blurStyle: BlurStyle.outer)],
+        boxShadow: const [BoxShadow(color: Color.fromRGBO(121, 65, 177, 1), spreadRadius: 4, blurRadius: 2, blurStyle: BlurStyle.outer)],
         borderRadius: BorderRadius.circular(16),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return Flex(
-            direction: Axis.horizontal,
-            // crossAxisAlignment: CrossAxisAlignment.center,
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: constraints.maxWidth * 0.3,
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.all(constraints.maxHeight * 0.08),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: iconBgColor,
-                  ),
-                  height: constraints.maxHeight * 0.5,
-                  child: Image.asset(
-                    color: Colors.white,
-                    imagePath ?? "assets/images/status.png",
-                    // fit: BoxFit.cover,
-                    height: constraints.maxHeight * 0.3,
-                  ),
-                ),
-              ),
-              Container(
-                width: constraints.maxWidth * 0.7,
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+          return isEnabled
+              ? CircularProgressIndicator()
+              : Stack(
                   children: [
-                    Text(
-                      heading,
-                      style:
-                          TextStyle(decoration: TextDecoration.none, fontSize: constraints.maxWidth * 0.054, color: Colors.black, fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      contentValue ?? "NA",
-                      style: TextStyle(decoration: TextDecoration.none, fontSize: constraints.maxWidth * 0.1, color: Colors.black, fontWeight: FontWeight.w700),
-                    ),
+                    CMSSfCircularChart(
+                        lsize: parent,
+                        title: heading,
+                        titleFontSize: 13,
+                        legendVisibility: true,
+                        props: Props(
+                          dataSource: [
+                            PieData(xData: 'Available', yData: lots ? areaSummary!.availableLots! : areaSummary!.availableSlots!),
+                            PieData(xData: 'Occupied', yData: lots ? areaSummary.occupiedLots! : areaSummary.occupiedSlots!),
+                          ],
+                          labelFontSize: 12,
+                          pointColorMapper: (p0, p1) {
+                            return colors[p1];
+                          },
+                        ),
+                        dataLabelMapper: (datum, index) {
+                          return '${datum.yData}(${((datum.yData / (lots ? areaSummary.totalLots! : areaSummary.totalSlots!)) * 100).round()}%)';
+                        }),
+                    Positioned(
+                        right: constraints.maxWidth * 0.14,
+                        bottom: constraints.maxHeight * 0.05,
+                        child: Material(
+                            color: Colors.transparent,
+                            child: Column(
+                              children: [
+                                Text(
+                                  lots ? areaSummary.totalLots.toString() : areaSummary.totalSlots.toString(),
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                Gap(constraints.maxHeight * 0.01),
+                                Text(
+                                  'Total',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ))),
                   ],
-                ),
-              ),
-            ],
-          );
+                );
         },
       ),
     );
@@ -856,6 +851,23 @@ class Customs {
       ),
     );
   }
+}
+
+class PieData {
+  PieData({required this.xData, required this.yData, this.text, this.color});
+  final String xData;
+  final num yData;
+  String? text;
+  Color? color;
+}
+
+class Props {
+  List<PieData>? dataSource;
+  double labelFontSize;
+  double? maximumValue;
+  Color? Function(PieData, int)? pointColorMapper;
+  void Function(ChartPointDetails pointInteractionDetails)? onPointTap;
+  Props({this.dataSource, this.labelFontSize = 14, this.maximumValue, this.pointColorMapper, this.onPointTap});
 }
 
 String? containerNbrValidator(String value) {

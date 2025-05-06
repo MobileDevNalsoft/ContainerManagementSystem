@@ -10,7 +10,6 @@ import 'package:warehouse_3d/bloc/damaged/damaged_bloc.dart';
 import 'package:warehouse_3d/bloc/dry/dry_bloc.dart';
 import 'package:warehouse_3d/bloc/frozen/empty_bloc.dart';
 import 'package:warehouse_3d/bloc/area/area_bloc.dart';
-import 'package:warehouse_3d/bloc/work_queue/work_queue_bloc.dart';
 import 'package:warehouse_3d/inits/init.dart';
 import 'navigations/route_generator.dart';
 
@@ -28,8 +27,7 @@ main() async {
       BlocProvider(create: (_) => AreaBloc(networkCalls: getIt())),
       BlocProvider(create: (_) => EmptyBloc(networkCalls: getIt())),
       BlocProvider(create: (_) => DryBloc(networkCalls: getIt())),
-      BlocProvider(create: (_) => DamagedBloc(networkCalls: getIt())),
-      BlocProvider(create: (_) => WorkQueueBloc(networkCalls: getIt())),
+      BlocProvider(create: (_) => DamagedBloc(networkCalls: getIt()))
     ],
     child: MaterialApp(
       navigatorKey: GlobalKey<NavigatorState>(),
